@@ -125,10 +125,13 @@ describe('cli', () => {
     expect(r.out).toContain('Would write');
   });
 
-  it('migrate on a folder returns 1 and says folder input is not supported yet', async () => {
-    const r = await cli('migrate', FIXTURES);
-    expect(r.code).toBe(1);
-    expect(r.err).toContain('folder input is not supported yet');
+  it('migrate --help lists --force and names all three sources', async () => {
+    const r = await cli('migrate', '--help');
+    expect(r.code).toBe(0);
+    expect(r.out).toContain('--force');
+    for (const source of ['Cypress JS', 'Selenium Python', 'Selenium Java']) {
+      expect(r.out).toContain(source);
+    }
   });
 
   it('migrate on a Selenium Python file writes the expected spec', async () => {

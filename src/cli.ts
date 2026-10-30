@@ -48,11 +48,14 @@ export async function run(argv: string[], io: Io = defaultIo): Promise<number> {
 
   program
     .command('migrate')
-    .description('Convert a Cypress test file to Playwright Test TypeScript.')
-    .argument('<input>', 'test file to convert')
+    .description(
+      'Convert a Cypress JS, Selenium Python or Selenium Java test file, or a folder of them, to Playwright Test TypeScript.',
+    )
+    .argument('<input>', 'test file or folder to convert')
     .option('--out <dir>', 'output folder')
     .option('--from <framework>', 'source framework: cypress-js, selenium-python or selenium-java')
     .option('--dry-run', 'show what would be written without writing files')
+    .option('--force', 'overwrite output files that already exist')
     .action(async (input: string, opts: MigrateOptions) => {
       exitCode = await runMigrate(input, opts, io);
     });

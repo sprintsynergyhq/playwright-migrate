@@ -4,6 +4,15 @@
   "private": true,
   "description": "Convert Selenium (Java, Python) and Cypress (JS) tests to Playwright Test TypeScript, with a report of what could not be converted.",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
   "author": {
     "name": "SprintSynergy",
@@ -29,6 +38,7 @@
     "README.md"
   ],
   "scripts": {
+    "prebuild": "node scripts/clean-dist.mjs",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint .",
@@ -40,7 +50,8 @@
     "e2e:expected": "playwright test",
     "e2e:expected:5x": "playwright test --repeat-each=5",
     "check": "npm run lint && npm run format:check && npm run check:style && npm run typecheck && npm test",
-    "grammars:sync": "node scripts/sync-grammars.mjs"
+    "grammars:sync": "node scripts/sync-grammars.mjs",
+    "test:pack": "node scripts/test-pack.mjs"
   },
   "dependencies": {
     "commander": "^15.0.0",
