@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-python/test_login_success.py",
+  "framework": "selenium-python",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 2,
+    "outputExpects": 2,
+    "blockedAssertions": 0,
+    "info": 4,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "TestLoginSuccess > test_login_with_standard_user",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 7
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 11
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 14
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 15
+    }
+  ]
+}

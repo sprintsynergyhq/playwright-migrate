@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sprintsynergyhq/playwright-migrate/schemas/migration-report.schema.json",
+  "title": "playwright-migrate Run Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "tool", "input", "files", "summary", "exitCode"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "const": "playwright-migrate" },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "input": { "type": "string" },
+    "files": { "type": "array", "items": { "$ref": "#/$defs/fileReport" } },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "files",
+        "converted",
+        "convertedWithWarnings",
+        "blocked",
+        "info",
+        "warn",
+        "block"
+      ],
+      "properties": {
+        "files": { "$ref": "#/$defs/count" },
+        "converted": { "$ref": "#/$defs/count" },
+        "convertedWithWarnings": { "$ref": "#/$defs/count" },
+        "blocked": { "$ref": "#/$defs/count" },
+        "info": { "$ref": "#/$defs/count" },
+        "warn": { "$ref": "#/$defs/count" },
+        "block": { "$ref": "#/$defs/count" }
+      }
+    },
+    "exitCode": { "enum": [0, 2] }
+  },
+  "$defs": {
+    "count": { "type": "integer", "minimum": 0 },
+    "line": { "type": "integer", "minimum": 1 },
+    "framework": { "enum": ["cypress-js", "selenium-python", "selenium-java"] },
+    "status": { "enum": ["converted", "converted_with_warnings", "blocked"] },
+    "flag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "ruleId", "message", "line"],
+      "properties": {
+        "level": { "enum": ["INFO", "WARN", "BLOCK"] },
+        "ruleId": { "type": "string", "pattern": "^[A-Z]+(_[A-Z]+)+$" },
+        "message": { "type": "string", "minLength": 1 },
+        "line": { "$ref": "#/$defs/line" }
+      }
+    },
+    "stepReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line", "endLine", "kind", "status", "flags"],
+      "properties": {
+        "line": { "$ref": "#/$defs/line" },
+        "endLine": { "$ref": "#/$defs/line" },
+        "kind": { "enum": ["navigate", "action", "assert", "wait", "removed", "unknown"] },
+        "status": { "enum": ["converted", "converted_with_note", "blocked"] },
+        "flags": { "type": "array", "items": { "$ref": "#/$defs/flag" } }
+      }
+    },
+    "fileReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "source",
+        "output",
+        "framework",
+        "status",
+        "counts",
+        "tests",
+        "hooks",
+        "fileFlags"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "output": { "type": ["string", "null"] },
+        "framework": { "$ref": "#/$defs/framework" },
+        "status": { "$ref": "#/$defs/status" },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tests",
+            "steps",
+            "sourceAssertions",
+            "outputExpects",
+            "blockedAssertions",
+            "info",
+            "warn",
+            "block"
+          ],
+          "properties": {
+            "tests": { "$ref": "#/$defs/count" },
+            "steps": { "$ref": "#/$defs/count" },
+            "sourceAssertions": { "$ref": "#/$defs/count" },
+            "outputExpects": { "$ref": "#/$defs/count" },
+            "blockedAssertions": { "$ref": "#/$defs/count" },
+            "info": { "$ref": "#/$defs/count" },
+            "warn": { "$ref": "#/$defs/count" },
+            "block": { "$ref": "#/$defs/count" }
+          }
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["title", "status", "line", "steps"],
+            "properties": {
+              "title": { "type": "string", "minLength": 1 },
+              "status": { "$ref": "#/$defs/status" },
+              "line": { "$ref": "#/$defs/line" },
+              "steps": { "type": "array", "items": { "$ref": "#/$defs/stepReport" } }
+            }
+          }
+        },
+        "hooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "line", "steps"],
+            "properties": {
+              "kind": { "enum": ["beforeEach", "afterEach", "beforeAll", "afterAll"] },
+              "line": { "$ref": "#/$defs/line" },
+              "steps": { "type": "array", "items": { "$ref": "#/$defs/stepReport" } }
+            }
+          }
+        },
+        "fileFlags": { "type": "array", "items": { "$ref": "#/$defs/flag" } }
+      }
+    }
+  }
+}
