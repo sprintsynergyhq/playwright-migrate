@@ -52,7 +52,8 @@
     "check": "npm run lint && npm run format:check && npm run check:style && npm run typecheck && npm test",
     "grammars:sync": "node scripts/sync-grammars.mjs",
     "test:pack": "node scripts/test-pack.mjs",
-    "demo:verify": "node scripts/demo-verify.mjs"
+    "demo:verify": "node scripts/demo-verify.mjs",
+    "docs:generate": "npm run build && node scripts/generate-docs.mjs"
   },
   "dependencies": {
     "commander": "^15.0.0",
