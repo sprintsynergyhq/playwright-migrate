@@ -6,6 +6,7 @@ import type {
   Flag,
   HookKind,
   Locator,
+  LocatorChainItem,
   MigrationFile,
   SourceSpan,
   Step,
@@ -18,6 +19,7 @@ import { deriveStepStatus } from '../../core/status.js';
 import {
   ACTIONS,
   BUILTIN_COMMANDS,
+  CALLBACK_METHODS,
   ELEMENT_ASSERTIONS,
   TITLE_ASSERTIONS,
   URL_ASSERTIONS,
@@ -136,6 +138,16 @@ type Subject =
   | { kind: 'title' }
   | { kind: 'element'; locator: Locator; notes: Flag[] };
 
+// Adds a chain item to the scope (from within) or starts a new locator.
+function startLocator(
+  scope: Locator | undefined,
+  item: LocatorChainItem & { kind: 'locator' },
+): Locator {
+  if (scope) return { ...scope, chain: [...scope.chain, item] };
+  const { strategy, value, options } = item;
+  return options ? { strategy, value, options, chain: [] } : { strategy, value, chain: [] };
+}
+
 const unsupported = (name: string): Blocked =>
   BUILTIN_COMMANDS.includes(name)
     ? new Blocked('CY_UNSUPPORTED_COMMAND', { name })
@@ -144,7 +156,10 @@ const unsupported = (name: string): Blocked =>
 class StatementConverter {
   readonly steps: Step[] = [];
 
-  constructor(private readonly span: SourceSpan) {}
+  constructor(
+    private readonly span: SourceSpan,
+    private readonly scope: Locator | undefined,
+  ) {}
 
   private takeNotes(subject: Subject): Flag[] {
     if (subject.kind !== 'element') return [];
@@ -160,7 +175,9 @@ class StatementConverter {
     const [first, ...rest] = links ?? [];
     if (!first) throw new Blocked('CORE_UNKNOWN_STATEMENT');
     let subject = this.command(first);
-    for (const link of rest) subject = this.method(link, subject);
+    rest.forEach((link, i) => {
+      subject = this.method(link, subject, i === rest.length - 1);
+    });
     if (this.steps.length === 0) throw new Blocked('CORE_UNKNOWN_STATEMENT');
     return this.steps;
   }
@@ -192,15 +209,13 @@ class StatementConverter {
       case 'get':
         if (args.length !== 1 || str0 === undefined) throw unsupported(name);
         if (str0.startsWith('@')) throw new Blocked('CY_ALIAS');
-        return { kind: 'element', locator: { strategy: 'css', value: str0, chain: [] }, notes: [] };
-      case 'contains':
-        // cy.contains(text). The selector form and .contains() on an element come in PR 5.
-        if (args.length !== 1 || str0 === undefined) throw unsupported(name);
         return {
           kind: 'element',
-          locator: { strategy: 'text', value: str0, chain: [] },
-          notes: [makeFlag('CORE_TEXT_LOCATOR', lineOf(link.nameNode))],
+          locator: startLocator(this.scope, { kind: 'locator', strategy: 'css', value: str0 }),
+          notes: [],
         };
+      case 'contains':
+        return this.contains(link, undefined);
       case 'url':
       case 'title':
         if (args.length !== 0) throw unsupported(name);
@@ -213,21 +228,81 @@ class StatementConverter {
         this.steps.push(withStatus({ kind: 'wait', policy: 'fixed', ms, span, flags }));
         return { kind: 'none' };
       }
+      case 'intercept':
+        throw new Blocked('CY_INTERCEPT');
       default:
         throw unsupported(name);
     }
   }
 
-  // Every link after the first: an assertion or an action. Chain methods come in PR 5.
-  private method(link: Link, subject: Subject): Subject {
-    if (link.name === 'should' || link.name === 'and') {
+  // cy.contains(text), cy.contains(selector, text) or .contains(text) on an element.
+  private contains(link: Link, parent: Locator | undefined): Subject {
+    const values = link.args.map((a) => stringValue(a));
+    if (values.length < 1 || values.length > 2 || values.some((v) => v === undefined))
+      throw unsupported('contains');
+    const notes = [makeFlag('CORE_TEXT_LOCATOR', lineOf(link.nameNode))];
+    const base = parent ?? this.scope;
+    if (values.length === 1) {
+      const item = { kind: 'locator', strategy: 'text', value: values[0]! } as const;
+      return { kind: 'element', locator: startLocator(base, item), notes };
+    }
+    const item = { kind: 'locator', strategy: 'css', value: values[0]! } as const;
+    const locator = startLocator(base, item);
+    return {
+      kind: 'element',
+      locator: { ...locator, chain: [...locator.chain, { kind: 'hasText', text: values[1]! }] },
+      notes,
+    };
+  }
+
+  // Every link after the first.
+  private method(link: Link, subject: Subject, isLast: boolean): Subject {
+    const { name, args } = link;
+    if (name === 'should' || name === 'and') {
       this.assertion(link, subject);
       return subject;
     }
-    const action = ACTIONS[link.name];
-    if (subject.kind !== 'element' || !action) throw unsupported(link.name);
-    this.action(link, subject, action.action, action.info);
-    return subject;
+    if (name === 'as') throw new Blocked('CY_ALIAS');
+    if (CALLBACK_METHODS.includes(name)) throw new Blocked('CY_THEN');
+    if (subject.kind !== 'element') throw unsupported(name);
+    const loc = subject.locator;
+    const chained = (item: LocatorChainItem): Subject => ({
+      kind: 'element',
+      locator: { ...loc, chain: [...loc.chain, item] },
+      notes: subject.notes,
+    });
+    const action = ACTIONS[name];
+    if (action) {
+      this.action(link, subject, action.action, action.info);
+      return subject;
+    }
+    switch (name) {
+      case 'find': {
+        const sel = stringValue(args[0]);
+        if (args.length !== 1 || sel === undefined) throw unsupported(name);
+        return chained({ kind: 'locator', strategy: 'css', value: sel });
+      }
+      case 'first':
+      case 'last':
+        if (args.length !== 0) throw unsupported(name);
+        return chained({ kind: name });
+      case 'eq': {
+        const n = integerValue(args[0]);
+        if (args.length !== 1 || n === undefined || n < -1) throw unsupported(name);
+        return chained(n === -1 ? { kind: 'last' } : { kind: 'nth', index: n });
+      }
+      case 'contains': {
+        const next = this.contains(link, loc);
+        if (next.kind === 'element') next.notes = [...subject.notes, ...next.notes];
+        return next;
+      }
+      case 'within':
+        if (!isLast) throw unsupported(name);
+        this.within(link, subject);
+        return subject;
+      default:
+        throw unsupported(name);
+    }
   }
 
   private action(
@@ -266,6 +341,8 @@ class StatementConverter {
 
   private assertion(link: Link, subject: Subject): void {
     const [chainerNode, ...rest] = link.args;
+    if (chainerNode?.type === 'arrow_function' || chainerNode?.type === 'function_expression')
+      throw new Blocked('CY_THEN');
     const detail = `${link.name}${link.argsText}`;
     const chainer = stringValue(chainerNode);
     if (chainer === undefined) throw new Blocked('CORE_UNSUPPORTED_ASSERTION', { detail });
@@ -282,7 +359,7 @@ class StatementConverter {
     const row: AssertionRow | undefined = table[base];
     if (!row) throw new Blocked('CORE_UNSUPPORTED_ASSERTION', { detail });
     const strings = rest.map((a) => stringValue(a));
-    const extra: { expected?: string | number } = {};
+    const extra: { expected?: string | number; attribute?: string } = {};
     const ok = ((): boolean => {
       switch (row.args) {
         case 'none':
@@ -297,6 +374,12 @@ class StatementConverter {
           extra.expected = n;
           return true;
         }
+        case 'attribute':
+          if (rest.length < 1 || rest.length > 2 || strings.some((s) => s === undefined))
+            return false;
+          extra.attribute = strings[0]!;
+          if (rest.length === 2) extra.expected = strings[1]!;
+          return true;
       }
     })();
     if (!ok) throw new Blocked('CORE_UNSUPPORTED_ASSERTION', { detail });
@@ -314,6 +397,27 @@ class StatementConverter {
       }),
     );
   }
+
+  // .within(() => { ... }): each inner statement is converted with the element as its scope.
+  private within(link: Link, subject: Subject & { kind: 'element' }): void {
+    const fn = link.args[0];
+    const body = fn?.childForFieldName('body');
+    const params = fn?.childForFieldName('parameters');
+    const isCallback = fn?.type === 'arrow_function' || fn?.type === 'function_expression';
+    if (link.args.length !== 1 || !isCallback || body?.type !== 'statement_block')
+      throw unsupported('within');
+    if (params && named(params).length > 0) throw unsupported('within');
+    const statements = named(body);
+    if (statements.length === 0) throw unsupported('within');
+    const start = this.steps.length;
+    for (const statement of statements) {
+      const inner = new StatementConverter(this.span, subject.locator);
+      this.steps.push(...inner.run(statement));
+    }
+    const first = this.steps[start]!;
+    const notes = [...this.takeNotes(subject), makeFlag('CY_WITHIN', lineOf(link.nameNode))];
+    this.steps[start] = withStatus({ ...first, flags: [...notes, ...first.flags] });
+  }
 }
 
 type Counters = { assertions: number; statements: number };
@@ -328,7 +432,7 @@ function bodySteps(body: Node, counters: Counters, forceRule?: RuleId): Step[] {
     counters.assertions += assertions;
     try {
       if (forceRule) throw new Blocked(forceRule);
-      steps.push(...new StatementConverter(span).run(statement));
+      steps.push(...new StatementConverter(span, undefined).run(statement));
     } catch (error) {
       if (!(error instanceof Blocked)) throw error;
       const flags = [makeFlag(error.ruleId, span.startLine, error.params)];

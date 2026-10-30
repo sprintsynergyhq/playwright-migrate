@@ -108,13 +108,15 @@ export const ACTIONS: Readonly<
 
 // What an assertion row needs from the should() arguments after the chainer.
 // none: no value. value: one string. number: one integer of 0 or more.
-export type AssertionArgs = 'none' | 'value' | 'number';
+// attribute: an attribute name and an optional string value.
+export type AssertionArgs = 'none' | 'value' | 'number' | 'attribute';
 
 export type AssertionRow = { assertion: AssertionKind; args: AssertionArgs };
 
 // Chainers on an element subject. A "not." prefix negates any row.
 export const ELEMENT_ASSERTIONS: Readonly<Record<string, AssertionRow>> = {
   'be.visible': { assertion: 'visible', args: 'none' },
+  'be.hidden': { assertion: 'hidden', args: 'none' },
   exist: { assertion: 'attached', args: 'none' },
   'have.text': { assertion: 'text', args: 'value' },
   contain: { assertion: 'containText', args: 'value' },
@@ -122,6 +124,11 @@ export const ELEMENT_ASSERTIONS: Readonly<Record<string, AssertionRow>> = {
   'include.text': { assertion: 'containText', args: 'value' },
   'have.value': { assertion: 'value', args: 'value' },
   'have.length': { assertion: 'count', args: 'number' },
+  'have.attr': { assertion: 'attribute', args: 'attribute' },
+  'have.class': { assertion: 'containClass', args: 'value' },
+  'be.enabled': { assertion: 'enabled', args: 'none' },
+  'be.disabled': { assertion: 'disabled', args: 'none' },
+  'be.checked': { assertion: 'checked', args: 'none' },
 };
 
 // Chainers on cy.url() and cy.title().
@@ -138,3 +145,6 @@ export const TITLE_ASSERTIONS: Readonly<Record<string, AssertionRow>> = {
   eq: { assertion: 'title', args: 'value' },
   equal: { assertion: 'title', args: 'value' },
 };
+
+// Methods whose argument is a callback. They are blocked with CY_THEN.
+export const CALLBACK_METHODS: readonly string[] = ['then', 'each', 'spread'];

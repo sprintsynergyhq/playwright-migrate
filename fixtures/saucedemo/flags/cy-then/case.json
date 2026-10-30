@@ -1,0 +1,11 @@
+{
+  "id": "cy-then",
+  "title": "Cypress Then Callback Is Blocked",
+  "intent": "An assertion inside a .then callback is not converted, so the test is emitted as test.fixme and the assertion is counted as blocked.",
+  "app": "https://www.saucedemo.com",
+  "framework": "cypress-js",
+  "source": "cypress-js/then-callback.cy.js",
+  "expectedStatus": "blocked",
+  "rules": ["CY_THEN"],
+  "runnable": false
+}

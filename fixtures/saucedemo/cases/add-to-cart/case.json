@@ -1,0 +1,12 @@
+{
+  "id": "add-to-cart",
+  "title": "Standard User Adds An Item To The Cart",
+  "intent": "A standard user adds the Sauce Labs Backpack, opens the cart, and sees exactly one item with the right name.",
+  "app": "https://www.saucedemo.com",
+  "sources": {
+    "cypress-js": "cypress-js/add-to-cart.cy.js",
+    "selenium-python": "selenium-python/test_add_to_cart.py",
+    "selenium-java": "selenium-java/AddToCartTest.java"
+  },
+  "expectCount": 4
+}

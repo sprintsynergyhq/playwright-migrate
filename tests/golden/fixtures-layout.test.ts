@@ -18,8 +18,15 @@ const cases = listCases();
 const flags = listFlags();
 
 // Update these lists when a PR adds a case or a flag fixture.
-const CASE_IDS = ['checkout-complete', 'login-locked-out', 'login-success'];
-const FLAG_IDS = ['cy-custom-command', 'cy-wait-time'];
+const CASE_IDS = [
+  'add-to-cart',
+  'cart-badge',
+  'checkout-complete',
+  'login-locked-out',
+  'login-success',
+  'sort-products',
+];
+const FLAG_IDS = ['cy-custom-command', 'cy-iframe', 'cy-intercept', 'cy-then', 'cy-wait-time'];
 
 function readLf(file: string): string {
   return readFileSync(file, 'utf8').replace(/\r\n/g, '\n');

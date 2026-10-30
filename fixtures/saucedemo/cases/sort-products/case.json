@@ -1,0 +1,12 @@
+{
+  "id": "sort-products",
+  "title": "Products Sort By Price",
+  "intent": "A standard user sorts products by price, low to high, and the cheapest item comes first and the most expensive last.",
+  "app": "https://www.saucedemo.com",
+  "sources": {
+    "cypress-js": "cypress-js/sort-products.cy.js",
+    "selenium-python": "selenium-python/test_sort_products.py",
+    "selenium-java": "selenium-java/SortProductsTest.java"
+  },
+  "expectCount": 3
+}

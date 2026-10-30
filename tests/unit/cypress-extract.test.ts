@@ -159,3 +159,124 @@ describe('cypress-js extractor', () => {
     expect(r.spec).toContain("test.skip('t', async ({ page }) => {");
   });
 });
+
+describe('cypress-js extractor chains and callbacks', () => {
+  it('maps find, first, last and eq', async () => {
+    const r = await convert(
+      wrap(
+        "cy.get('.a').find('.b').first().click();",
+        "cy.get('.a').eq(2).click();",
+        "cy.get('.a').eq(-1).click();",
+        "cy.get('.a').last().click();",
+      ),
+    );
+    expect(r.spec).toContain("await page.locator('.a').locator('.b').first().click();");
+    expect(r.spec).toContain("await page.locator('.a').nth(2).click();");
+    expect(r.spec.match(/await page\.locator\('\.a'\)\.last\(\)\.click\(\);/g)).toHaveLength(2);
+    expect(r.status).toBe('converted');
+  });
+
+  it('maps cy.contains with a selector and contains on an element', async () => {
+    const r = await convert(
+      wrap(
+        "cy.contains('.btn', 'Add').click();",
+        "cy.get('.list').contains('Backpack').should('be.visible');",
+      ),
+    );
+    expect(r.spec).toContain("await page.locator('.btn').filter({ hasText: 'Add' }).click();");
+    expect(r.spec).toContain(
+      "await expect(page.locator('.list').getByText('Backpack')).toBeVisible();",
+    );
+    expect(r.flags).toEqual(['INFO CORE_TEXT_LOCATOR 3', 'INFO CORE_TEXT_LOCATOR 4']);
+  });
+
+  it('maps the element assertion table', async () => {
+    const r = await convert(
+      wrap(
+        "cy.get('.a').should('have.attr', 'href', '/x');",
+        "cy.get('.a').should('have.attr', 'disabled');",
+        "cy.get('.a').should('have.class', 'primary');",
+        "cy.get('#c').should('be.checked').and('not.be.disabled');",
+        "cy.get('#e').should('be.enabled');",
+        "cy.get('#h').should('be.hidden');",
+        "cy.title().should('include', 'Swag');",
+      ),
+    );
+    expect(r.spec).toContain("await expect(page.locator('.a')).toHaveAttribute('href', '/x');");
+    expect(r.spec).toContain("await expect(page.locator('.a')).toHaveAttribute('disabled');");
+    expect(r.spec).toContain("await expect(page.locator('.a')).toContainClass('primary');");
+    expect(r.spec).toContain("await expect(page.locator('#c')).toBeChecked();");
+    expect(r.spec).toContain("await expect(page.locator('#c')).not.toBeDisabled();");
+    expect(r.spec).toContain("await expect(page.locator('#e')).toBeEnabled();");
+    expect(r.spec).toContain("await expect(page.locator('#h')).toBeHidden();");
+    expect(r.spec).toContain('await expect(page).toHaveTitle(/Swag/);');
+    expect(r.counts.sourceAssertions).toBe(8);
+    expect(r.counts.outputExpects).toBe(8);
+  });
+
+  it('inlines within into the locator chain with an INFO flag at the within line', async () => {
+    const r = await convert(
+      wrap(
+        "cy.get('.row')",
+        '  .last()',
+        '  .within(() => {',
+        "    cy.get('button').click();",
+        "    cy.contains('Remove').should('be.visible');",
+        '  });',
+      ),
+    );
+    expect(r.spec).toContain("await page.locator('.row').last().locator('button').click();");
+    expect(r.spec).toContain(
+      "await expect(page.locator('.row').last().getByText('Remove')).toBeVisible();",
+    );
+    expect(r.flags).toEqual(['INFO CY_WITHIN 5', 'INFO CORE_TEXT_LOCATOR 7']);
+    expect(r.status).toBe('converted');
+  });
+
+  it('blocks the whole statement when a within step cannot be converted', async () => {
+    const r = await convert(
+      wrap("cy.get('.row').within(() => {", "  cy.get('a').rightclick();", '});'),
+    );
+    expect(r.flags).toEqual(['BLOCK CY_UNSUPPORTED_COMMAND 3']);
+    expect(r.spec).toContain('// Source lines 3-5:');
+  });
+
+  it('blocks within that is not the last call in the chain', async () => {
+    const r = await convert(wrap("cy.get('.row').within(() => { cy.get('a').click(); }).click();"));
+    expect(r.flags).toEqual(['BLOCK CY_UNSUPPORTED_COMMAND 3']);
+  });
+
+  it('blocks intercept, as and alias waits', async () => {
+    const r = await convert(
+      wrap("cy.intercept('GET', '/api').as('api');", "cy.get('.a').as('row');", "cy.wait('@api');"),
+    );
+    expect(r.flags).toEqual(['BLOCK CY_INTERCEPT 3', 'BLOCK CY_ALIAS 4', 'BLOCK CY_ALIAS 5']);
+  });
+
+  it('blocks then, each and should with a function, and counts their assertions', async () => {
+    const r = await convert(
+      wrap(
+        "cy.get('.a').then(($a) => {",
+        "  expect($a.text()).to.equal('x');",
+        '});',
+        "cy.get('.a').each(($a) => {",
+        "  cy.wrap($a).should('be.visible');",
+        '});',
+        "cy.get('.a').should(($a) => {",
+        '  expect($a).to.have.length(2);',
+        '});',
+      ),
+    );
+    expect(r.flags).toEqual(['BLOCK CY_THEN 3', 'BLOCK CY_THEN 6', 'BLOCK CY_THEN 9']);
+    expect(r.counts.sourceAssertions).toBe(4);
+    expect(r.counts.blockedAssertions).toBe(4);
+    expect(r.spec).toContain('// Source lines 3-5:');
+  });
+
+  it('blocks iframe access through its', async () => {
+    const r = await convert(
+      wrap("cy.get('iframe').its('0.contentDocument.body').find('button').click();"),
+    );
+    expect(r.flags).toEqual(['BLOCK CY_UNSUPPORTED_COMMAND 3']);
+  });
+});

@@ -1,0 +1,11 @@
+{
+  "id": "cy-intercept",
+  "title": "Cypress Intercept And Alias Are Blocked",
+  "intent": "cy.intercept with an alias and cy.wait('@alias') have no safe mapping, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "cypress-js",
+  "source": "cypress-js/intercept.cy.js",
+  "expectedStatus": "blocked",
+  "rules": ["CY_ALIAS", "CY_INTERCEPT"],
+  "runnable": false
+}
