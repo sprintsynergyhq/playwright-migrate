@@ -26,7 +26,19 @@ const CASE_IDS = [
   'login-success',
   'sort-products',
 ];
-const FLAG_IDS = ['cy-custom-command', 'cy-iframe', 'cy-intercept', 'cy-then', 'cy-wait-time'];
+const FLAG_IDS = [
+  'cy-custom-command',
+  'cy-dropped-test',
+  'cy-iframe',
+  'cy-intercept',
+  'cy-only-skip',
+  'cy-then',
+  'cy-wait-time',
+  'py-custom-wait',
+  'py-execute-script',
+  'py-switch-frame',
+  'py-time-sleep',
+];
 
 function readLf(file: string): string {
   return readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
@@ -105,13 +117,18 @@ describe('SauceDemo flag fixtures', () => {
         const lines = readLf(spec).split('\n');
         expect(lines[0]).toBe(`// Migrated from: ${f.meta.source}`);
         expect(lines[1]).toMatch(/^import \{ test(, expect)? \} from '@playwright\/test';$/);
-        expect(readLf(spec)).not.toContain('test.only');
+        expect(readLf(spec)).not.toMatch(/\.only\(/);
       });
 
       it('uses test.fixme only when blocked, and runnable says the same', () => {
-        const blocked = f.meta.expectedStatus === 'blocked';
-        expect(readLf(spec).includes('test.fixme(')).toBe(blocked);
-        expect(f.meta.runnable).toBe(!blocked);
+        const text = readLf(spec);
+        const fixme = text.includes('test.fixme(');
+        expect(f.meta.runnable).toBe(!fixme);
+        if (fixme) expect(f.meta.expectedStatus).toBe('blocked');
+        // A blocked file without test.fixme has a dropped test, shown as a BLOCK comment.
+        if (f.meta.expectedStatus === 'blocked') {
+          expect(fixme || text.includes('// playwright-migrate BLOCK ')).toBe(true);
+        }
       });
 
       it('has an expected report that agrees with case.json', () => {

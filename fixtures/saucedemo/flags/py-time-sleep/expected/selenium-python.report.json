@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-python/test_fixed_wait.py",
+  "framework": "selenium-python",
+  "status": "converted_with_warnings",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 1,
+    "outputExpects": 1,
+    "blockedAssertions": 0,
+    "info": 4,
+    "warn": 1,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "TestFixedWait > test_waits_before_checking_title",
+      "status": "converted_with_warnings"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 9
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 12
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 16
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 17
+    },
+    {
+      "level": "WARN",
+      "ruleId": "CORE_FIXED_WAIT",
+      "line": 19
+    }
+  ]
+}

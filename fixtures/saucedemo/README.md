@@ -22,7 +22,7 @@ flags/<flag-id>/
 
 - `case.json` lists the case id, title, intent, app URL, the source file for each framework, and `expectCount` (the number of `expect(` calls in each expected spec).
 - `expected/<source>.spec.ts` is the hand-written Playwright Test output that the converter must produce later, byte for byte.
-- A flag `case.json` lists the id, title, intent, app URL, `framework`, `source`, `expectedStatus`, `rules` (the WARN and BLOCK rule ids the report must contain) and `runnable` (false when the expected spec uses `test.fixme`).
+- A flag `case.json` lists the id, title, intent, app URL, `framework`, `source`, `expectedStatus`, `rules` (the WARN and BLOCK rule ids the report must contain) and `runnable` (false when the expected spec uses `test.fixme`). A blocked flag fixture can still be runnable when the blocked source is a dropped test: the spec then has a BLOCK comment under the import and no `test.fixme`.
 - `expected/<source>.report.json` is the golden report: the file report without the output path, steps, or messages. The golden tests convert each source and compare both the spec and the report with these files.
 - Source files are inputs only. They are not executed in this repo, and they are excluded from ESLint and Prettier so they stay exactly as written.
 - The expected specs are real tests. CI type-checks them, lints them and runs them against SauceDemo five times each.

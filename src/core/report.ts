@@ -101,6 +101,24 @@ export function buildFileReport(file: MigrationFile, output: string | null): Fil
   const hooks = collectHooks(file);
   const allSteps = [...hooks.flatMap((h) => h.steps), ...tests.flatMap((t) => t.test.steps)];
   const allFlags = [...file.fileFlags, ...allSteps.flatMap((s) => s.flags)];
+  // Dropped tests are listed and counted as blocked, in source order with the emitted tests.
+  const droppedTests: TestReport[] = file.fileFlags.flatMap((f) =>
+    f.droppedTests.map((titlePath) => ({
+      title: titlePath.join(TITLE_SEPARATOR),
+      status: 'blocked' as const,
+      line: f.span.startLine,
+      steps: [],
+    })),
+  );
+  const testReports: TestReport[] = [
+    ...tests.map((t) => ({
+      title: t.titlePath.join(TITLE_SEPARATOR),
+      status: deriveTestStatus(t),
+      line: t.test.span.startLine,
+      steps: t.test.steps.map(stepReport),
+    })),
+    ...droppedTests,
+  ].sort((a, b) => a.line - b.line);
   const count = (level: FlagLevel): number => allFlags.filter((f) => f.level === level).length;
   return {
     schemaVersion: 1,
@@ -109,30 +127,26 @@ export function buildFileReport(file: MigrationFile, output: string | null): Fil
     framework: file.framework,
     status: deriveFileStatus(file),
     counts: {
-      tests: tests.length,
+      tests: testReports.length,
       steps: allSteps.length,
       sourceAssertions: file.sourceAssertions,
       outputExpects: allSteps.filter((s) => s.kind === 'assert').length,
-      blockedAssertions: allSteps.reduce(
-        (n, s) => n + (s.kind === 'unknown' ? s.assertionCount : 0),
-        0,
-      ),
+      blockedAssertions:
+        allSteps.reduce((n, s) => n + (s.kind === 'unknown' ? s.assertionCount : 0), 0) +
+        file.fileFlags.reduce((n, f) => n + f.assertionCount, 0),
       info: count('INFO'),
       warn: count('WARN'),
       block: count('BLOCK'),
     },
-    tests: tests.map((t) => ({
-      title: t.titlePath.join(TITLE_SEPARATOR),
-      status: deriveTestStatus(t),
-      line: t.test.span.startLine,
-      steps: t.test.steps.map(stepReport),
-    })),
+    tests: testReports,
     hooks: hooks.map((h) => ({
       kind: h.kind,
       line: h.span.startLine,
       steps: h.steps.map(stepReport),
     })),
-    fileFlags: [...file.fileFlags].sort(compareFlags),
+    fileFlags: file.fileFlags
+      .map(({ level, ruleId, message, line }) => ({ level, ruleId, message, line }))
+      .sort(compareFlags),
   };
 }
 

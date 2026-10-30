@@ -1,8 +1,11 @@
 // Cypress JS extractor: walks the tree-sitter syntax tree of a .cy.js file and builds the IR.
 // Every statement in a test or hook body becomes at least one step. A statement that cannot be
-// converted becomes one unknown step with a BLOCK flag. Nothing is dropped.
+// converted becomes one unknown step with a BLOCK flag. A top-level or suite statement that
+// cannot be read becomes a BLOCK file flag that lists the tests and counts the assertions inside
+// it, so nothing is dropped without a trace.
 import type { Node } from 'web-tree-sitter';
 import type {
+  FileFlag,
   Flag,
   HookKind,
   Locator,
@@ -10,12 +13,19 @@ import type {
   MigrationFile,
   SourceSpan,
   Step,
-  StepStatus,
   SuiteItem,
 } from '../../core/ir.js';
-import { getRule, ruleMessage } from '../../core/rules.js';
 import type { RuleId } from '../../core/rules.js';
-import { deriveStepStatus } from '../../core/status.js';
+import {
+  Blocked,
+  blockedStep,
+  fileFlag,
+  lineOf,
+  makeFlag,
+  named,
+  spanOf,
+  withStatus,
+} from '../shared.js';
 import {
   ACTIONS,
   BUILTIN_COMMANDS,
@@ -25,41 +35,6 @@ import {
   URL_ASSERTIONS,
 } from './table.js';
 import type { AssertionRow } from './table.js';
-
-// Thrown while converting one statement. The statement becomes an unknown step with this rule.
-class Blocked extends Error {
-  constructor(
-    readonly ruleId: RuleId,
-    readonly params: Record<string, string> = {},
-  ) {
-    super(ruleId);
-  }
-}
-
-const lineOf = (node: Node): number => node.startPosition.row + 1;
-
-function makeFlag(ruleId: RuleId, line: number, params?: Record<string, string>): Flag {
-  return { level: getRule(ruleId).level, ruleId, message: ruleMessage(ruleId, params), line };
-}
-
-function withStatus<T extends { kind: Step['kind']; flags: Flag[] }>(
-  step: T,
-): T & { status: StepStatus } {
-  return { ...step, status: deriveStepStatus(step) };
-}
-
-function spanOf(node: Node): SourceSpan {
-  return {
-    startLine: node.startPosition.row + 1,
-    endLine: node.endPosition.row + 1,
-    startColumn: node.startPosition.column,
-    text: node.text,
-  };
-}
-
-function named(node: Node): Node[] {
-  return node.namedChildren.filter((c): c is Node => c !== null && c.type !== 'comment');
-}
 
 const ESCAPES: Record<string, string> = {
   '\\n': '\n',
@@ -168,9 +143,9 @@ class StatementConverter {
     return notes;
   }
 
+  // statement is an expression statement, or the expression body of an arrow function.
   run(statement: Node): Step[] {
-    if (statement.type !== 'expression_statement') throw new Blocked('CORE_UNKNOWN_STATEMENT');
-    const expr = named(statement)[0];
+    const expr = statement.type === 'expression_statement' ? named(statement)[0] : statement;
     const links = expr ? flattenChain(expr) : undefined;
     const [first, ...rest] = links ?? [];
     if (!first) throw new Blocked('CORE_UNKNOWN_STATEMENT');
@@ -423,9 +398,9 @@ class StatementConverter {
 type Counters = { assertions: number; statements: number };
 
 // Converts the statements of a test or hook body.
-function bodySteps(body: Node, counters: Counters, forceRule?: RuleId): Step[] {
+function bodySteps(statements: Node[], counters: Counters, forceRule?: RuleId): Step[] {
   const steps: Step[] = [];
-  for (const statement of named(body)) {
+  for (const statement of statements) {
     const span = spanOf(statement);
     const assertions = countAssertions(statement);
     counters.statements += 1;
@@ -435,8 +410,7 @@ function bodySteps(body: Node, counters: Counters, forceRule?: RuleId): Step[] {
       steps.push(...new StatementConverter(span, undefined).run(statement));
     } catch (error) {
       if (!(error instanceof Blocked)) throw error;
-      const flags = [makeFlag(error.ruleId, span.startLine, error.params)];
-      steps.push(withStatus({ kind: 'unknown', assertionCount: assertions, span, flags }));
+      steps.push(blockedStep(error, span, assertions));
     }
   }
   return steps;
@@ -451,53 +425,83 @@ const HOOKS: Record<string, HookKind> = {
   after: 'afterAll',
 };
 
-type Block = { kind: 'suite' | 'test' | 'hook'; name: string; skipped: boolean; args: Node[] };
+type Block = {
+  kind: 'suite' | 'test' | 'hook';
+  name: string;
+  skipped: boolean;
+  only: boolean;
+  callee: Node;
+  args: Node[];
+};
 
-// describe('x', fn), it.skip('x', fn), beforeEach(fn) and so on. Undefined for anything else.
-function blockCall(statement: Node): Block | undefined {
-  if (statement.type !== 'expression_statement') return undefined;
-  const call = named(statement)[0];
+// describe('x', fn), it.skip('x', fn), xit('x', fn), it.only('x', fn), beforeEach(fn) and so
+// on. node is an expression statement or a call. Undefined for anything else.
+function blockCall(node: Node): Block | undefined {
+  const call = node.type === 'expression_statement' ? named(node)[0] : node;
   if (call?.type !== 'call_expression') return undefined;
   const fn = call.childForFieldName('function');
   const argsNode = call.childForFieldName('arguments');
   if (!fn || argsNode?.type !== 'arguments') return undefined;
   let name: string;
-  let skipped = false;
+  let modifier: string | undefined;
   if (fn.type === 'identifier') name = fn.text;
   else if (
     fn.type === 'member_expression' &&
     fn.childForFieldName('object')?.type === 'identifier' &&
-    fn.childForFieldName('property')?.text === 'skip'
+    ['skip', 'only'].includes(fn.childForFieldName('property')?.text ?? '')
   ) {
     name = fn.childForFieldName('object')!.text;
-    skipped = true;
+    modifier = fn.childForFieldName('property')!.text;
   } else return undefined;
+  // xdescribe, xcontext, xit and xspecify are skipped like .skip.
+  const xSkipped = !modifier && /^x(describe|context|it|specify)$/.test(name);
+  if (xSkipped) name = name.slice(1);
   const kind = SUITES.includes(name)
     ? 'suite'
     : TESTS.includes(name)
       ? 'test'
-      : HOOKS[name] && !skipped
+      : HOOKS[name] && !modifier
         ? 'hook'
         : undefined;
-  return kind ? { kind, name, skipped, args: named(argsNode) } : undefined;
+  if (!kind) return undefined;
+  const skipped = xSkipped || modifier === 'skip';
+  return { kind, name, skipped, only: modifier === 'only', callee: fn, args: named(argsNode) };
 }
 
-// The statement block of a callback with no parameters.
-function callbackBody(node: Node | undefined): Node | undefined {
+// The statements of a callback with no parameters. An expression body, as in
+// () => cy.visit('/'), is one statement.
+function callbackStatements(node: Node | undefined): Node[] | undefined {
   if (node?.type !== 'arrow_function' && node?.type !== 'function_expression') return undefined;
   const params = node.childForFieldName('parameters');
   if (params && named(params).length > 0) return undefined;
   const body = node.childForFieldName('body');
-  return body?.type === 'statement_block' ? body : undefined;
+  if (!body) return undefined;
+  if (body.type === 'statement_block') return named(body);
+  return node.type === 'arrow_function' ? [body] : undefined;
 }
 
-function extractItems(statements: Node[], counters: Counters, fileFlags: Flag[]): SuiteItem[] {
+const UNTITLED = '(untitled)';
+
+// The title paths of every test call inside node, the way the extractor would see them. Test and
+// hook bodies are not searched.
+function findTests(node: Node, titlePath: string[]): string[][] {
+  const block = node.type === 'call_expression' ? blockCall(node) : undefined;
+  if (block?.kind === 'hook') return [];
+  if (block?.kind === 'test') return [[...titlePath, stringValue(block.args[0]) ?? UNTITLED]];
+  const inner =
+    block?.kind === 'suite' ? [...titlePath, stringValue(block.args[0]) ?? UNTITLED] : titlePath;
+  return named(node).flatMap((child) => findTests(child, inner));
+}
+
+type Context = { counters: Counters; fileFlags: FileFlag[] };
+
+function extractItems(statements: Node[], titlePath: string[], ctx: Context): SuiteItem[] {
   const items: SuiteItem[] = [];
   for (const statement of statements) {
     const block = blockCall(statement);
     const span = spanOf(statement);
     const title = block?.kind === 'hook' ? undefined : stringValue(block?.args[0]);
-    const body = callbackBody(block?.kind === 'hook' ? block.args[0] : block?.args[1]);
+    const body = callbackStatements(block?.kind === 'hook' ? block.args[0] : block?.args[1]);
     const argCount = block?.kind === 'hook' ? 1 : 2;
     const valid =
       block !== undefined &&
@@ -505,22 +509,29 @@ function extractItems(statements: Node[], counters: Counters, fileFlags: Flag[])
       body !== undefined &&
       (block.kind === 'hook' || title !== undefined);
     if (!valid) {
-      fileFlags.push(makeFlag('CORE_UNKNOWN_STATEMENT', span.startLine));
+      // The statement is dropped. Its tests and assertions are still listed and counted.
+      const assertions = countAssertions(statement);
+      ctx.counters.assertions += assertions;
+      const dropped = findTests(statement, titlePath);
+      ctx.fileFlags.push(
+        fileFlag('CORE_UNKNOWN_STATEMENT', statement, undefined, assertions, dropped),
+      );
       continue;
     }
+    if (block.only) ctx.fileFlags.push(fileFlag('CY_ONLY', block.callee, { name: block.name }));
     if (block.kind === 'suite') {
-      const inner = extractItems(named(body), counters, fileFlags);
+      const inner = extractItems(body, [...titlePath, title!], ctx);
       items.push({
         type: 'suite',
         suite: { name: title!, skipped: block.skipped, items: inner, span },
       });
     } else if (block.kind === 'test') {
-      const steps = bodySteps(body, counters);
+      const steps = bodySteps(body, ctx.counters);
       items.push({ type: 'test', test: { name: title!, skipped: block.skipped, steps, span } });
     } else {
       const kind = HOOKS[block.name]!;
       const runOnce = kind === 'beforeAll' || kind === 'afterAll';
-      const steps = bodySteps(body, counters, runOnce ? 'CY_BEFORE_HOOK' : undefined);
+      const steps = bodySteps(body, ctx.counters, runOnce ? 'CY_BEFORE_HOOK' : undefined);
       items.push({ type: 'hook', hook: { kind, steps, span } });
     }
   }
@@ -529,15 +540,15 @@ function extractItems(statements: Node[], counters: Counters, fileFlags: Flag[])
 
 // Builds the IR for one Cypress file. root is the program node of the syntax tree.
 export function extractCypress(root: Node, sourcePath: string): MigrationFile {
-  const counters: Counters = { assertions: 0, statements: 0 };
-  const fileFlags: Flag[] = [];
-  const items = extractItems(named(root), counters, fileFlags);
+  const ctx: Context = { counters: { assertions: 0, statements: 0 }, fileFlags: [] };
+  const items = extractItems(named(root), [], ctx);
   return {
     sourcePath,
     framework: 'cypress-js',
     items,
-    fileFlags,
-    sourceAssertions: counters.assertions,
-    sourceStatements: counters.statements,
+    fileFlags: ctx.fileFlags,
+    sourceAssertions: ctx.counters.assertions,
+    sourceStatements: ctx.counters.statements,
+    sourceTests: findTests(root, []).length,
   };
 }

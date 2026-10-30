@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-python/test_add_to_cart.py",
+  "framework": "selenium-python",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 4,
+    "outputExpects": 4,
+    "blockedAssertions": 0,
+    "info": 4,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "test_add_backpack_to_cart",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 6
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 15
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 16
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_STORED_ELEMENT",
+      "line": 22
+    }
+  ]
+}

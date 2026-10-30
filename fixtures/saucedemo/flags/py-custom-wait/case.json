@@ -1,0 +1,11 @@
+{
+  "id": "py-custom-wait",
+  "title": "Python Lambda Wait Is Blocked",
+  "intent": "WebDriverWait.until with a lambda is not converted, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "selenium-python",
+  "source": "selenium-python/test_custom_wait.py",
+  "expectedStatus": "blocked",
+  "rules": ["CORE_CUSTOM_WAIT"],
+  "runnable": false
+}

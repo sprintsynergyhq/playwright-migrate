@@ -5,8 +5,9 @@ import {
   action,
   css,
   expectStep,
-  fill,
+  fileFlag,
   flag,
+  fill,
   goto,
   hook,
   removed,
@@ -28,6 +29,7 @@ function cypress(): MigrationFile {
     framework: 'cypress-js',
     sourceAssertions: 2,
     sourceStatements: 6,
+    sourceTests: 1,
     fileFlags: [],
     items: [
       suite('Login', at(1, 10), [
@@ -52,8 +54,9 @@ function python(): MigrationFile {
     framework: 'selenium-python',
     sourceAssertions: 1,
     sourceStatements: 6,
+    sourceTests: 1,
     // The driver fixture (lines 8 to 12) is replaced by the page fixture.
-    fileFlags: [flag('CORE_DRIVER_LIFECYCLE', 8)],
+    fileFlags: [fileFlag('CORE_DRIVER_LIFECYCLE', at(8, 12))],
     items: [
       test('test_locked_out_user_sees_error', at(15, 23), [
         goto(at(16), URL),
@@ -77,6 +80,7 @@ function java(): MigrationFile {
     framework: 'selenium-java',
     sourceAssertions: 1,
     sourceStatements: 8,
+    sourceTests: 1,
     fileFlags: [],
     items: [
       suite('LoginLockedOutTest', at(16, 39), [

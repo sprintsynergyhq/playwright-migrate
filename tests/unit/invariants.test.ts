@@ -5,7 +5,7 @@ import {
   InvariantError,
 } from '../../src/core/invariants.js';
 import type { AssertStep, MigrationFile, SuiteItem } from '../../src/core/ir.js';
-import { blocked, flag } from '../ir-fixtures/helpers.js';
+import { blocked, fileFlag, flag } from '../ir-fixtures/helpers.js';
 import { loginSuccessIr } from '../ir-fixtures/login-success.js';
 
 const cypress = (): MigrationFile => loginSuccessIr()['cypress-js'];
@@ -82,6 +82,36 @@ describe('invariants', () => {
     expect(problems).toContain(
       'action step at line 7 flag CORE_FILL_REPLACES_VALUE has level WARN, expected INFO',
     );
+  });
+
+  it('fails when a source test is neither emitted nor listed as dropped', () => {
+    const file = cypress();
+    file.sourceTests = 2;
+    expect(findInvariantProblems(file)).toEqual([
+      'test accounting: 2 source tests, but 1 emitted and 0 dropped',
+    ]);
+  });
+
+  it('accepts a dropped test and its assertions when a BLOCK file flag lists them', () => {
+    const file = cypress();
+    file.sourceTests = 2;
+    file.sourceAssertions = 3;
+    const span = { startLine: 20, endLine: 22, startColumn: 2, text: "it('x', (done) => {\n})" };
+    file.fileFlags.push(fileFlag('CORE_UNKNOWN_STATEMENT', span, undefined, 1, [['Login', 'x']]));
+    expect(findInvariantProblems(file)).toEqual([]);
+  });
+
+  it('fails when a file flag points outside its span or drops tests at WARN level', () => {
+    const file = cypress();
+    file.sourceTests = 2;
+    const span = { startLine: 20, endLine: 20, startColumn: 2, text: 'it.only' };
+    const warn = fileFlag('CY_ONLY', span, { name: 'it' }, 0, [['Login', 'x']]);
+    warn.line = 21;
+    file.fileFlags.push(warn);
+    expect(findInvariantProblems(file)).toEqual([
+      'file flag CY_ONLY at line 21 points outside its span',
+      'file flag CY_ONLY at line 21 drops tests or assertions but is not a BLOCK flag',
+    ]);
   });
 
   it('lists the source path in the error message', () => {

@@ -54,20 +54,42 @@ export function findInvariantProblems(file: MigrationFile): string[] {
   }
 
   for (const flag of file.fileFlags) {
+    const where = `file flag ${String(flag.ruleId)} at line ${flag.line}`;
     if (!isRuleId(flag.ruleId)) problems.push(`file flag uses unknown rule ${String(flag.ruleId)}`);
     else if (getRule(flag.ruleId).level !== flag.level) {
       problems.push(
         `file flag ${flag.ruleId} has level ${flag.level}, expected ${getRule(flag.ruleId).level}`,
       );
     }
+    if (flag.span.startLine < 1 || flag.span.endLine < flag.span.startLine) {
+      problems.push(`${where} has an invalid span`);
+    } else if (flag.line < flag.span.startLine || flag.line > flag.span.endLine) {
+      problems.push(`${where} points outside its span`);
+    }
+    if (flag.level !== 'INFO' && flag.span.text.trim() === '') {
+      problems.push(`${where} has no source text`);
+    }
+    if ((flag.assertionCount > 0 || flag.droppedTests.length > 0) && flag.level !== 'BLOCK') {
+      problems.push(`${where} drops tests or assertions but is not a BLOCK flag`);
+    }
   }
 
   // Every source assertion is either an expect in the output or counted inside a blocked step.
   const converted = steps.filter((s) => s.kind === 'assert' && s.origin === 'assertion').length;
-  const blocked = steps.reduce((n, s) => n + (s.kind === 'unknown' ? s.assertionCount : 0), 0);
+  const blocked =
+    steps.reduce((n, s) => n + (s.kind === 'unknown' ? s.assertionCount : 0), 0) +
+    file.fileFlags.reduce((n, f) => n + f.assertionCount, 0);
   if (converted + blocked !== file.sourceAssertions) {
     problems.push(
       `assertion accounting: ${file.sourceAssertions} source assertions, but ${converted} converted and ${blocked} blocked`,
+    );
+  }
+
+  // Every source test is either emitted or listed as dropped by a file flag.
+  const dropped = file.fileFlags.reduce((n, f) => n + f.droppedTests.length, 0);
+  if (tests.length + dropped !== file.sourceTests) {
+    problems.push(
+      `test accounting: ${file.sourceTests} source tests, but ${tests.length} emitted and ${dropped} dropped`,
     );
   }
 

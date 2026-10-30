@@ -21,6 +21,7 @@ async function convert(text: string) {
     status: golden.status,
     counts: golden.counts,
     flags: golden.flags.map((f) => `${f.level} ${f.ruleId} ${f.line}`),
+    tests: golden.tests.map((x) => `${x.title}: ${x.status}`),
   };
 }
 
@@ -129,11 +130,71 @@ describe('cypress-js extractor', () => {
     expect(r.spec).toContain('test.beforeEach(async ({ page }) => {');
   });
 
-  it('flags unknown top-level statements and it.only at file level', async () => {
+  it('prints a file flag with its source line and text', async () => {
     const r = await convert(
       [
         "const user = 'standard_user';",
         "describe('S', () => {",
+        "  it('t', () => {",
+        "    cy.visit('https://www.saucedemo.com/');",
+        '  });',
+        '});',
+        '',
+      ].join('\n'),
+    );
+    expect(r.flags).toEqual(['BLOCK CORE_UNKNOWN_STATEMENT 1']);
+    expect(r.status).toBe('blocked');
+    expect(r.spec).toContain(
+      [
+        '// playwright-migrate BLOCK CORE_UNKNOWN_STATEMENT: Statement not recognized, so it was not converted. Convert it by hand.',
+        "// Source line 1: const user = 'standard_user';",
+      ].join('\n'),
+    );
+  });
+
+  it('lists and counts a dropped test and its assertions', async () => {
+    const r = await convert(
+      [
+        "describe('S', () => {",
+        "  it('kept', () => {",
+        "    cy.visit('https://www.saucedemo.com/');",
+        '  });',
+        "  it('dropped', (done) => {",
+        "    cy.get('#a').should('be.visible').and('have.text', 'A');",
+        '    done();',
+        '  });',
+        '});',
+        '',
+      ].join('\n'),
+    );
+    expect(r.flags).toEqual(['BLOCK CORE_UNKNOWN_STATEMENT 5']);
+    expect(r.tests).toEqual(['S > kept: converted', 'S > dropped: blocked']);
+    expect(r.counts).toMatchObject({ tests: 2, sourceAssertions: 2, blockedAssertions: 2 });
+    expect(r.spec).toContain('// Source lines 5-8:');
+    expect(r.spec).toContain("//   it('dropped', (done) => {");
+    expect(r.spec).toContain('//     done();');
+  });
+
+  it('lists every test inside a dropped suite', async () => {
+    const r = await convert(
+      [
+        'describe(TITLE, () => {',
+        "  it('a', () => {});",
+        "  describe('inner', () => {",
+        "    it('b', () => {});",
+        '  });',
+        '});',
+        '',
+      ].join('\n'),
+    );
+    expect(r.tests).toEqual(['(untitled) > a: blocked', '(untitled) > inner > b: blocked']);
+    expect(r.counts.tests).toBe(2);
+  });
+
+  it('converts it.only and describe.only to normal tests with a WARN', async () => {
+    const r = await convert(
+      [
+        "describe.only('S', () => {",
         "  it.only('t', () => {",
         "    cy.get('#a').should('be.visible');",
         '  });',
@@ -141,22 +202,67 @@ describe('cypress-js extractor', () => {
         '',
       ].join('\n'),
     );
-    expect(r.flags).toEqual(['BLOCK CORE_UNKNOWN_STATEMENT 1', 'BLOCK CORE_UNKNOWN_STATEMENT 3']);
-    expect(r.status).toBe('blocked');
+    expect(r.flags).toEqual(['WARN CY_ONLY 1', 'WARN CY_ONLY 2']);
+    expect(r.status).toBe('converted_with_warnings');
+    expect(r.spec).not.toContain('.only(');
+    expect(r.spec).toContain("test('t', async ({ page }) => {");
+    expect(r.spec).toContain(
+      [
+        '// playwright-migrate WARN CY_ONLY: it.only was converted to a normal it, because Playwright test.only would skip every other test in the run. Add .only back by hand if you need it.',
+        '// Source line 2: it.only',
+      ].join('\n'),
+    );
   });
 
-  it('converts it.skip to test.skip', async () => {
+  it('converts it.skip, xit, xspecify, describe.skip and xdescribe to skipped tests', async () => {
     const r = await convert(
       [
         "describe('S', () => {",
-        "  it.skip('t', () => {",
+        "  it.skip('a', () => {",
         '    cy.reload();',
         '  });',
+        "  xit('b', () => {",
+        '    cy.reload();',
+        '  });',
+        "  xspecify('c', () => {",
+        '    cy.reload();',
+        '  });',
+        '});',
+        "describe.skip('T', () => {",
+        "  it('d', () => {});",
+        '});',
+        "xdescribe('U', () => {",
+        "  it('e', () => {});",
         '});',
         '',
       ].join('\n'),
     );
-    expect(r.spec).toContain("test.skip('t', async ({ page }) => {");
+    expect(r.flags).toEqual([]);
+    expect(r.spec).toContain("test.skip('a', async ({ page }) => {");
+    expect(r.spec).toContain("test.skip('b', async ({ page }) => {");
+    expect(r.spec).toContain("test.skip('c', async ({ page }) => {");
+    expect(r.spec).toContain("test.describe.skip('T', () => {");
+    expect(r.spec).toContain("test.describe.skip('U', () => {");
+    expect(r.counts.tests).toBe(5);
+  });
+
+  it('converts expression-bodied arrow tests and hooks as one statement', async () => {
+    const r = await convert(
+      [
+        "describe('S', () => {",
+        "  beforeEach(() => cy.visit('https://www.saucedemo.com/'));",
+        "  it('t', () => cy.get('[data-test=\"title\"]').should('have.text', 'Products'));",
+        '});',
+        '',
+      ].join('\n'),
+    );
+    expect(r.flags).toEqual([]);
+    expect(r.status).toBe('converted');
+    expect(r.counts).toMatchObject({ tests: 1, sourceAssertions: 1, outputExpects: 1 });
+    expect(r.spec).toContain("await page.goto('https://www.saucedemo.com/');");
+    expect(r.spec).toContain(
+      "await expect(page.locator('[data-test=\"title\"]')).toHaveText('Products');",
+    );
   });
 });
 

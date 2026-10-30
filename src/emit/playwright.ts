@@ -8,6 +8,7 @@ import type {
   LocatorBase,
   LocatorChainItem,
   MigrationFile,
+  SourceSpan,
   Step,
   SuiteItem,
   Test,
@@ -117,8 +118,8 @@ function flagComment(flag: Flag): string {
 }
 
 // The source of a blocked step as comments, dedented by the column where the statement starts.
-export function sourceComment(step: Step): string[] {
-  const { startLine, endLine, startColumn, text } = step.span;
+export function sourceComment(item: { span: SourceSpan }): string[] {
+  const { startLine, endLine, startColumn, text } = item.span;
   const lines = text.split('\n');
   if (startLine === endLine && lines.length === 1) return [`// Source line ${startLine}: ${text}`];
   const dedent = (line: string, i: number): string => {
@@ -224,7 +225,10 @@ export function emitPlaywrightRaw(file: MigrationFile): string {
     return chunks.flatMap((c, i) => (i === 0 ? c : ['', ...c]));
   };
 
-  const fileComments = file.fileFlags.filter((f) => f.level !== 'INFO').map(flagComment);
+  // WARN and BLOCK file flags print the rule message and the source they point to.
+  const fileComments = file.fileFlags
+    .filter((f) => f.level !== 'INFO')
+    .flatMap((f) => [flagComment(f), ...sourceComment(f)]);
   const main = items(file.items);
   const head = [
     `// Migrated from: ${file.sourcePath}`,

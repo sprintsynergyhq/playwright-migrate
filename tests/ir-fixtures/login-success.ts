@@ -26,6 +26,7 @@ function cypress(): MigrationFile {
     framework: 'cypress-js',
     sourceAssertions: 2,
     sourceStatements: 6,
+    sourceTests: 1,
     fileFlags: [],
     items: [
       suite('Login', at(1, 13), [
@@ -50,6 +51,7 @@ function python(): MigrationFile {
     framework: 'selenium-python',
     sourceAssertions: 2,
     sourceStatements: 8,
+    sourceTests: 1,
     fileFlags: [],
     items: [
       suite('TestLoginSuccess', at(5, 18), [
@@ -80,6 +82,7 @@ function java(): MigrationFile {
     framework: 'selenium-java',
     sourceAssertions: 2,
     sourceStatements: 8,
+    sourceTests: 1,
     fileFlags: [],
     items: [
       suite('LoginSuccessTest', at(13, 35), [

@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import type {
   ActionStep,
   AssertStep,
+  FileFlag,
   Flag,
   Hook,
   HookKind,
@@ -114,6 +115,15 @@ export const blocked = (
     span,
     flags: [flag(ruleId, span.startLine, params)],
   });
+
+// A file flag on a span. Only BLOCK flags can drop assertions or tests.
+export const fileFlag = (
+  ruleId: RuleId,
+  span: SourceSpan,
+  params?: Record<string, string>,
+  assertionCount = 0,
+  droppedTests: string[][] = [],
+): FileFlag => ({ ...flag(ruleId, span.startLine, params), span, assertionCount, droppedTests });
 
 export const hook = (kind: HookKind, span: SourceSpan, steps: Step[]): SuiteItem => ({
   type: 'hook',

@@ -214,6 +214,14 @@ export const RULES = [
     message: 'cy.within scope was inlined into the locator chain.',
   },
   {
+    id: 'CY_ONLY',
+    level: 'WARN',
+    appliesTo: 'cypress-js',
+    title: 'Exclusive test',
+    message:
+      '{name}.only was converted to a normal {name}, because Playwright test.only would skip every other test in the run. Add .only back by hand if you need it.',
+  },
+  {
     id: 'PY_MAIN_GUARD',
     level: 'INFO',
     appliesTo: 'selenium-python',

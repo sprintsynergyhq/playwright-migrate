@@ -1,0 +1,11 @@
+{
+  "id": "cy-dropped-test",
+  "title": "Cypress Test With A Done Callback Is Dropped",
+  "intent": "A test whose callback takes a done parameter is not converted. It is listed as blocked, its assertion is counted as blocked, and its source is printed under the import. The other test still runs.",
+  "app": "https://www.saucedemo.com",
+  "framework": "cypress-js",
+  "source": "cypress-js/dropped-test.cy.js",
+  "expectedStatus": "blocked",
+  "rules": ["CORE_UNKNOWN_STATEMENT"],
+  "runnable": true
+}
