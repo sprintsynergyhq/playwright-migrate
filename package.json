@@ -1,0 +1,55 @@
+{
+  "name": "@sprintsynergy/playwright-migrate",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Convert Selenium (Java, Python) and Cypress (JS) tests to Playwright Test TypeScript, with a report of what could not be converted.",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "SprintSynergy",
+    "url": "https://sprintsynergy.com"
+  },
+  "contributors": [
+    {
+      "name": "Muhammad Usman",
+      "url": "https://linkedin.com/in/sdet-muhammadusman"
+    }
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "bin": {
+    "playwright-migrate": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:style": "node scripts/check-style.mjs",
+    "test": "vitest run",
+    "test:smoke": "node dist/cli.js --version && node dist/cli.js detect fixtures/saucedemo",
+    "e2e:expected": "playwright test",
+    "e2e:expected:5x": "playwright test --repeat-each=5",
+    "check": "npm run lint && npm run format:check && npm run check:style && npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^22",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
+  }
+}

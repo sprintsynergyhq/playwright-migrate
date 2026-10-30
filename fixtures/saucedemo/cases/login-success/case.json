@@ -1,0 +1,12 @@
+{
+  "id": "login-success",
+  "title": "Standard User Logs In",
+  "intent": "A standard user signs in with valid credentials and lands on the Products page.",
+  "app": "https://www.saucedemo.com",
+  "sources": {
+    "cypress-js": "cypress-js/login-success.cy.js",
+    "selenium-python": "selenium-python/test_login_success.py",
+    "selenium-java": "selenium-java/LoginSuccessTest.java"
+  },
+  "expectCount": 2
+}
