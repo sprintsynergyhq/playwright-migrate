@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-java/JsExecutorTest.java",
+  "framework": "selenium-java",
+  "status": "blocked",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 1,
+    "outputExpects": 1,
+    "blockedAssertions": 0,
+    "info": 4,
+    "warn": 0,
+    "block": 1
+  },
+  "tests": [
+    {
+      "title": "JsExecutorTest > scrollsWithJavascript",
+      "status": "blocked"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 18
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 23
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 29
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 30
+    },
+    {
+      "level": "BLOCK",
+      "ruleId": "CORE_JS_EXECUTOR",
+      "line": 32
+    }
+  ]
+}

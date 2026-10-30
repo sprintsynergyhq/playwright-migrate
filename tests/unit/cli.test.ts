@@ -145,10 +145,18 @@ describe('cli', () => {
     expect(r.out).toContain('test_login_success.py: converted');
   });
 
-  it('migrate on a Selenium Java file returns 1 and says it is not supported yet', async () => {
-    const r = await cli('migrate', LOGIN_JAVA, '--out', tempDir());
-    expect(r.code).toBe(1);
-    expect(r.err).toContain('conversion from selenium-java is not supported yet');
+  it('migrate on a Selenium Java file writes the expected spec', async () => {
+    const out = tempDir();
+    const r = await cli('migrate', LOGIN_JAVA, '--out', out);
+    expect(r.code).toBe(0);
+    const expected = readFileSync(
+      path.join(FIXTURES, 'cases', 'login-success', 'expected', 'selenium-java.spec.ts'),
+      'utf8',
+    );
+    const spec = readFileSync(path.join(out, 'LoginSuccessTest.spec.ts'), 'utf8');
+    expect(spec.split('\n')[0]).toBe('// Migrated from: LoginSuccessTest.java');
+    expect(spec.split('\n').slice(1)).toEqual(expected.split('\n').slice(1));
+    expect(r.out).toContain('LoginSuccessTest.java: converted');
   });
 
   it('migrate on a file that cannot be detected returns 1', async () => {

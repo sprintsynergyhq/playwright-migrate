@@ -4,7 +4,7 @@
 
 ## Status
 
-Early development. `detect` works for all three sources. `migrate` converts one Cypress JS or Selenium Python file at a time. Selenium Java and folder input are not supported yet.
+Early development. `detect` works for all three sources. `migrate` converts one Cypress JS, Selenium Python or Selenium Java file at a time. Folder input is not supported yet.
 
 ## Planned Sources And Target
 
@@ -24,6 +24,7 @@ Target: Playwright Test in TypeScript.
 - Blocked tests are emitted as `test.fixme`, with the original source kept as a comment, so a blocked test can never pass.
 - A source test that cannot be read at all, for example a Cypress test whose callback takes a `done` parameter, is not emitted. Its source is printed as a comment under the import, the report lists it as blocked, and its assertions are counted as blocked.
 - `it.only` and `describe.only` are converted without `.only` and get a WARN flag, because `test.only` would skip every other test in the run. `xit`, `xdescribe` and `.skip` become `test.skip` and `test.describe.skip`.
+- Selenium Java: JUnit 5 `@Disabled` and TestNG `@Test(enabled = false)` become `test.skip`, and a JUnit 5 `@DisplayName` becomes the test title. JUnit 5 and TestNG assertions are both read, so `assertEquals` works with either order of expected and actual values.
 
 ## Usage
 
