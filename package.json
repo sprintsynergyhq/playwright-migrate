@@ -1,8 +1,15 @@
 {
   "name": "@sprintsynergy/playwright-migrate",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
   "description": "Convert Selenium (Java, Python) and Cypress (JS) tests to Playwright Test TypeScript, with a report of what could not be converted.",
+  "keywords": [
+    "playwright",
+    "cypress",
+    "selenium",
+    "migration",
+    "test-automation",
+    "codemod"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,6 +21,14 @@
     "./package.json": "./package.json"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sprintsynergyhq/playwright-migrate.git"
+  },
+  "homepage": "https://github.com/sprintsynergyhq/playwright-migrate#readme",
+  "bugs": {
+    "url": "https://github.com/sprintsynergyhq/playwright-migrate/issues"
+  },
   "author": {
     "name": "SprintSynergy",
     "url": "https://sprintsynergy.com"
@@ -34,9 +49,13 @@
     "dist",
     "schemas",
     "grammars",
+    "CHANGELOG.md",
     "LICENSE",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "prebuild": "node scripts/clean-dist.mjs",
     "build": "tsc -p tsconfig.build.json",
@@ -53,7 +72,9 @@
     "grammars:sync": "node scripts/sync-grammars.mjs",
     "test:pack": "node scripts/test-pack.mjs",
     "demo:verify": "node scripts/demo-verify.mjs",
-    "docs:generate": "npm run build && node scripts/generate-docs.mjs"
+    "docs:generate": "npm run build && node scripts/generate-docs.mjs",
+    "prepublishOnly": "npm run build",
+    "release:check": "node scripts/check-release.mjs"
   },
   "dependencies": {
     "commander": "^15.0.0",
