@@ -51,7 +51,8 @@
     "e2e:expected:5x": "playwright test --repeat-each=5",
     "check": "npm run lint && npm run format:check && npm run check:style && npm run typecheck && npm test",
     "grammars:sync": "node scripts/sync-grammars.mjs",
-    "test:pack": "node scripts/test-pack.mjs"
+    "test:pack": "node scripts/test-pack.mjs",
+    "demo:verify": "node scripts/demo-verify.mjs"
   },
   "dependencies": {
     "commander": "^15.0.0",

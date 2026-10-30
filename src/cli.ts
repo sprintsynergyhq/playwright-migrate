@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { Command, CommanderError } from 'commander';
 import { runDetect } from './commands/detect.js';
 import { runMigrate, type MigrateOptions } from './commands/migrate.js';
+import { runVerify, type VerifyOptions } from './commands/verify.js';
 import type { Io } from './core/types.js';
 import { getVersion } from './version.js';
 
@@ -58,6 +59,17 @@ export async function run(argv: string[], io: Io = defaultIo): Promise<number> {
     .option('--force', 'overwrite output files that already exist')
     .action(async (input: string, opts: MigrateOptions) => {
       exitCode = await runMigrate(input, opts, io);
+    });
+
+  program
+    .command('verify')
+    .description(
+      'Run the specs in a folder written by migrate with Playwright and add the results to its reports.',
+    )
+    .argument('[dir]', 'folder written by migrate', 'playwright-migrated')
+    .option('--repeat-each <n>', 'run each test this many times', '5')
+    .action((dir: string, opts: VerifyOptions) => {
+      exitCode = runVerify(dir, opts, io);
     });
 
   try {

@@ -11,6 +11,7 @@ export default defineConfig(
       'test-results/',
       'coverage/',
       'playwright-migrated/',
+      '.demo/',
       'fixtures/**/cypress-js/',
       'fixtures/**/selenium-python/',
       'fixtures/**/selenium-java/',

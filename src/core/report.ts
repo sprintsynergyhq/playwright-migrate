@@ -1,3 +1,4 @@
+import type { Verification } from './verify.js';
 import type { Flag, MigrationFile, Step, StepStatus } from './ir.js';
 import type { FlagLevel, RuleId } from './rules.js';
 import {
@@ -58,6 +59,8 @@ export type RunReport = {
     block: number;
   };
   exitCode: 0 | 2;
+  /** Added by `verify` after the converted specs ran. */
+  verification?: Verification;
 };
 
 export type GoldenFlag = { level: FlagLevel; ruleId: RuleId; line: number };
@@ -233,8 +236,9 @@ export function renderReportMarkdown(run: RunReport): string {
     '| --- | --- | --- | --- | --- | --- | --- |',
     `| ${s.files} | ${s.converted} | ${s.convertedWithWarnings} | ${s.blocked} | ${s.info} | ${s.warn} | ${s.block} |`,
     '',
-    '## Files',
   ];
+  if (run.verification) lines.push(...renderVerification(run.verification));
+  lines.push('## Files');
   for (const f of run.files) {
     const flags = [
       ...f.fileFlags,
@@ -264,4 +268,30 @@ export function renderReportMarkdown(run: RunReport): string {
     }
   }
   return lines.join('\n') + '\n';
+}
+
+function renderVerification(v: Verification): string[] {
+  const t = v.totals;
+  const lines = [
+    '## Verification',
+    '',
+    `Ran the converted specs with Playwright, --repeat-each=${v.repeatEach}, retries 0.`,
+    '',
+    '| Runs | Passed | Failed | Skipped | Flaky |',
+    '| --- | --- | --- | --- | --- |',
+    `| ${t.runs} | ${t.passed} | ${t.failed} | ${t.skipped} | ${t.flaky} |`,
+    '',
+    '| Output | Runs | Passed | Failed | Skipped |',
+    '| --- | --- | --- | --- | --- |',
+    ...v.files.map(
+      (f) => `| ${escapeCell(f.output)} | ${f.runs} | ${f.passed} | ${f.failed} | ${f.skipped} |`,
+    ),
+    '',
+  ];
+  if (v.unreported.length > 0) {
+    lines.push('Spec files that ran but are not in this report:', '');
+    for (const f of v.unreported) lines.push(`- ${f}`);
+    lines.push('');
+  }
+  return lines;
 }
