@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "source": "cypress-js/checkout-complete.cy.js",
+  "framework": "cypress-js",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 3,
+    "outputExpects": 3,
+    "blockedAssertions": 0,
+    "info": 5,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "Checkout > completes checkout for one item",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 4
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 5
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 10
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 11
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 12
+    }
+  ]
+}

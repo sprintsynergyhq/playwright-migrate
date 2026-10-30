@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { detectPath, detectSource } from '../../src/core/detect.js';
-import { REPO_ROOT } from '../golden/harness.js';
+import { REPO_ROOT, listSourceFiles } from '../golden/harness.js';
 
 describe('detectSource', () => {
   it('labels Java that imports org.openqa.selenium as selenium-java', () => {
@@ -65,21 +65,14 @@ describe('detectSource', () => {
 });
 
 describe('detectPath', () => {
-  it('finds the 6 SauceDemo sources, skips expected folders and sorts by path', async () => {
+  it('finds every SauceDemo source, skips expected folders and sorts by path', async () => {
     const results = await detectPath(path.join(REPO_ROOT, 'fixtures', 'saucedemo'));
-    expect(results.map((r) => r.path)).toEqual([
-      'cases/login-locked-out/cypress-js/login-locked-out.cy.js',
-      'cases/login-locked-out/selenium-java/LoginLockedOutTest.java',
-      'cases/login-locked-out/selenium-python/test_login_locked_out.py',
-      'cases/login-success/cypress-js/login-success.cy.js',
-      'cases/login-success/selenium-java/LoginSuccessTest.java',
-      'cases/login-success/selenium-python/test_login_success.py',
-    ]);
+    expect(results.map((r) => ({ path: r.path, framework: r.framework }))).toEqual(
+      listSourceFiles(),
+    );
     const paths = results.map((r) => r.path);
     expect([...paths].sort()).toEqual(paths);
-    for (const framework of ['cypress-js', 'selenium-python', 'selenium-java']) {
-      expect(results.filter((r) => r.framework === framework)).toHaveLength(2);
-    }
+    expect(paths.some((p) => p.includes('/expected/'))).toBe(false);
   });
 
   it('detects a single file and returns its file name', async () => {

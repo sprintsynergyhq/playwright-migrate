@@ -1,0 +1,11 @@
+{
+  "id": "cy-custom-command",
+  "title": "Cypress Custom Command Is Blocked",
+  "intent": "A custom command (cy.login) is not converted, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "cypress-js",
+  "source": "cypress-js/custom-command.cy.js",
+  "expectedStatus": "blocked",
+  "rules": ["CY_CUSTOM_COMMAND"],
+  "runnable": false
+}

@@ -199,6 +199,14 @@ export const RULES = [
       'Cypress command .{name}() has no safe Playwright mapping in v0.1. Convert this step by hand.',
   },
   {
+    id: 'CY_BEFORE_HOOK',
+    level: 'BLOCK',
+    appliesTo: 'cypress-js',
+    title: 'Run-once hook',
+    message:
+      'before and after hooks are not converted, because Playwright beforeAll and afterAll hooks cannot use the page fixture. Move these steps into beforeEach or afterEach by hand.',
+  },
+  {
     id: 'CY_WITHIN',
     level: 'INFO',
     appliesTo: 'cypress-js',
