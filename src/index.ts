@@ -18,3 +18,5 @@ export {
 } from './core/report.js';
 export type { FileReport, GoldenReport, RunReport } from './core/report.js';
 export { checkInvariants, findInvariantProblems, InvariantError } from './core/invariants.js';
+export { emitPlaywright } from './emit/playwright.js';
+export { parseSource, ParseError } from './parse/treeSitter.js';

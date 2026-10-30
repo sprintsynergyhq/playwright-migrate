@@ -24,6 +24,7 @@
   "files": [
     "dist",
     "schemas",
+    "grammars",
     "LICENSE",
     "README.md"
   ],
@@ -35,13 +36,16 @@
     "format:check": "prettier --check .",
     "check:style": "node scripts/check-style.mjs",
     "test": "vitest run",
-    "test:smoke": "node dist/cli.js --version && node dist/cli.js detect fixtures/saucedemo",
+    "test:smoke": "node dist/cli.js --version && node dist/cli.js detect fixtures/saucedemo && node scripts/smoke-parse.mjs",
     "e2e:expected": "playwright test",
     "e2e:expected:5x": "playwright test --repeat-each=5",
-    "check": "npm run lint && npm run format:check && npm run check:style && npm run typecheck && npm test"
+    "check": "npm run lint && npm run format:check && npm run check:style && npm run typecheck && npm test",
+    "grammars:sync": "node scripts/sync-grammars.mjs"
   },
   "dependencies": {
-    "commander": "^15.0.0"
+    "commander": "^15.0.0",
+    "prettier": "^3.9.10",
+    "web-tree-sitter": "^0.27.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -49,7 +53,9 @@
     "@types/node": "^22",
     "ajv": "^8.20.0",
     "eslint": "^10.13.0",
-    "prettier": "^3.9.10",
+    "tree-sitter-java": "^0.23.5",
+    "tree-sitter-javascript": "^0.25.0",
+    "tree-sitter-python": "^0.25.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.72.0",
     "vitest": "^5.0.5"
