@@ -28,6 +28,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run test:smoke
+      - run: npm run test:pack
   expected-specs-e2e:
     needs: check
     runs-on: ubuntu-latest

@@ -356,3 +356,64 @@ describe('selenium-java extractor', () => {
     expect(r.tests).toEqual(['T > t: blocked']);
   });
 });
+
+describe('selenium-java fully qualified Selenium types', () => {
+  const hookClass = (setUp: string): string =>
+    [
+      'class T {',
+      '    private org.openqa.selenium.WebDriver driver;',
+      '    private org.openqa.selenium.support.ui.WebDriverWait wait;',
+      '    @BeforeEach',
+      '    void setUp() {',
+      `        ${setUp}`,
+      '        wait = new org.openqa.selenium.support.ui.WebDriverWait(driver, Duration.ofSeconds(5));',
+      '    }',
+      '    @Test',
+      '    void t() {',
+      '        driver.get("https://www.saucedemo.com/");',
+      '    }',
+      '}',
+      '',
+    ].join('\n');
+
+  it.each([
+    'driver = new org.openqa.selenium.chrome.ChromeDriver();',
+    'driver = new org.openqa.selenium.firefox.FirefoxDriver();',
+    'driver = new org.openqa.selenium.edge.EdgeDriver();',
+  ])('removes %s in @BeforeEach without a BLOCK flag', async (setUp) => {
+    const r = await convert(hookClass(setUp));
+    expect(r.status).toBe('converted');
+    expect(r.counts.block).toBe(0);
+    expect(r.flags).toEqual(['INFO CORE_DRIVER_LIFECYCLE 6', 'INFO CORE_WAIT_OBJECT 7']);
+    expect(r.spec).toContain("await page.goto('https://www.saucedemo.com/');");
+  });
+
+  it('does not treat a driver class from another package as a Selenium driver', async () => {
+    const r = await convert(hookClass('driver = new com.example.ChromeDriver();'));
+    expect(r.status).toBe('blocked');
+    expect(r.flags).toContain('BLOCK CORE_UNKNOWN_STATEMENT 6');
+  });
+
+  it('converts the fully qualified fixture like the login-success case', async () => {
+    const source = 'tests/fixtures/selenium-java/QualifiedDriverTest.java';
+    const text = readFileSync(source, 'utf8').replace(/\r\n/g, '\n');
+    const result = await convertSource(
+      'selenium-java',
+      'selenium-java/LoginSuccessTest.java',
+      text,
+      null,
+    );
+    const caseDir = 'fixtures/saucedemo/cases/login-success/expected';
+    expect(result.spec).toBe(readFileSync(`${caseDir}/selenium-java.spec.ts`, 'utf8'));
+    const golden = toGoldenReport(result.report);
+    const expected = JSON.parse(readFileSync(`${caseDir}/selenium-java.report.json`, 'utf8')) as {
+      flags: Array<{ ruleId: string }>;
+      counts: unknown;
+      tests: unknown;
+    };
+    expect(golden.status).toBe('converted');
+    expect(golden.counts).toEqual(expected.counts);
+    expect(golden.tests).toEqual(expected.tests);
+    expect(golden.flags.map((f) => f.ruleId)).toEqual(expected.flags.map((f) => f.ruleId));
+  });
+});

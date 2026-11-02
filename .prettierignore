@@ -8,3 +8,4 @@ fixtures/**/cypress-js
 fixtures/**/selenium-python
 fixtures/**/selenium-java
 grammars
+playwright-migrated

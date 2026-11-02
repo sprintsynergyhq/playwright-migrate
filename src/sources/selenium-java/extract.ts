@@ -113,16 +113,24 @@ const DRIVER_CLASSES = [
 ];
 const DRIVER_TYPES = ['WebDriver', 'RemoteWebDriver', ...DRIVER_CLASSES];
 
-// new ChromeDriver() and the other driver constructors.
+// A Selenium type name with its package removed, so org.openqa.selenium.chrome.ChromeDriver
+// reads as ChromeDriver. Names from any other package are returned unchanged.
+const SELENIUM_QUALIFIED = /^org\.openqa\.selenium(?:\.[a-z][a-z0-9_]*)*\.([A-Z]\w*)$/;
+export function simpleSeleniumType(text: string): string {
+  const compact = text.replace(/\s+/g, '');
+  return SELENIUM_QUALIFIED.exec(compact)?.[1] ?? text;
+}
+
+const typeOf = (node: Node): string =>
+  simpleSeleniumType(node.childForFieldName('type')?.text ?? '');
+
+// new ChromeDriver() and the other driver constructors, also fully qualified.
 function isDriverConstructor(node: Node | null | undefined): boolean {
-  return (
-    node?.type === 'object_creation_expression' &&
-    DRIVER_CLASSES.includes(node.childForFieldName('type')?.text ?? '')
-  );
+  return node?.type === 'object_creation_expression' && DRIVER_CLASSES.includes(typeOf(node));
 }
 
 const isNew = (node: Node | null | undefined, type: string): boolean =>
-  node?.type === 'object_creation_expression' && node.childForFieldName('type')?.text === type;
+  node?.type === 'object_creation_expression' && typeOf(node) === type;
 
 // this.driver and driver name the same field.
 const keyOf = (node: Node): string => node.text.replace(/^this\./, '');
@@ -768,7 +776,7 @@ function drop(
 // A field that only declares the driver or the wait object, such as private WebDriver driver;
 function isDriverField(member: Node): boolean {
   if (member.type !== 'field_declaration') return false;
-  const type = member.childForFieldName('type')?.text ?? '';
+  const type = typeOf(member);
   const declarators = named(member).filter((n) => n.type === 'variable_declarator');
   const plain = declarators.every((d) => !d.childForFieldName('value'));
   return plain && declarators.length > 0 && [...DRIVER_TYPES, 'WebDriverWait'].includes(type);
@@ -786,8 +794,7 @@ function classItem(node: Node, ctx: Context): SuiteItem {
   const scope: Scope = { drivers: new Set(), vars: new Map() };
   for (const member of members) {
     if (member.type === 'field_declaration' && isDriverField(member)) {
-      const type = member.childForFieldName('type')?.text ?? '';
-      if (DRIVER_TYPES.includes(type)) {
+      if (DRIVER_TYPES.includes(typeOf(member))) {
         for (const d of named(member).filter((n) => n.type === 'variable_declarator')) {
           scope.drivers.add(nameOf(d));
         }

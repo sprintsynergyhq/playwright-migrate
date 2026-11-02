@@ -20,3 +20,17 @@ export type { FileReport, GoldenReport, RunReport } from './core/report.js';
 export { checkInvariants, findInvariantProblems, InvariantError } from './core/invariants.js';
 export { emitPlaywright } from './emit/playwright.js';
 export { parseSource, ParseError } from './parse/treeSitter.js';
+export { convertSource, isConvertible, UnsupportedSourceError } from './core/convert.js';
+export type { Conversion } from './core/convert.js';
+export {
+  DEFAULT_OUT_DIR,
+  findExistingFiles,
+  MigrationError,
+  planMigration,
+  REPORT_JSON,
+  REPORT_MD,
+  writeMigration,
+} from './core/migrate.js';
+export type { MigrationOptions, MigrationPlan, PlannedFile } from './core/migrate.js';
+export { PLAYWRIGHT_CONFIG_FILE, renderPlaywrightConfig } from './emit/config.js';
+export { specFileName } from './sources/index.js';
