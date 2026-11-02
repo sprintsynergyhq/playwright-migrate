@@ -4,7 +4,7 @@
 
 ## Status
 
-Early development. `detect` works for all three sources. `migrate` converts one Cypress JS, Selenium Python or Selenium Java file, or every supported file under a folder, and `verify` runs the converted specs and records the results. The package is not published yet.
+Version 0.1.0 is the first release. `detect` works for all three sources. `migrate` converts one Cypress JS, Selenium Python or Selenium Java file, or every supported file under a folder, and `verify` runs the converted specs and records the results. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Sources And Target
 
@@ -62,13 +62,10 @@ These patterns are never converted. Each one adds a BLOCK flag to the report, an
 
 ## Usage
 
-The package is not published yet. The npm package will be published as `@sprintsynergy/playwright-migrate`. The command it installs is `playwright-migrate`.
-
-Build it locally, then run the CLI from the repo folder:
+Install it as a dev dependency in the project you are migrating. It needs Node.js 22.13 or later.
 
 ```sh
-npm ci
-npm run build
+npm install -D @sprintsynergy/playwright-migrate
 npx playwright-migrate detect <path>
 ```
 
@@ -92,7 +89,90 @@ For a folder, `migrate` converts every Cypress JS, Selenium Python and Selenium 
 npx playwright-migrate verify playwright-migrated
 ```
 
-`verify` runs the converted specs in a folder written by `migrate` with Playwright, five times each by default (`--repeat-each <n>`) and with no retries. It needs `@playwright/test` and the Chromium browser installed where the folder is. It prints the passed, failed and skipped runs per spec file and writes the counts into `migration-report.json` and `migration-report.md`. Blocked tests are `test.fixme`, so they are counted as skipped. The exit code is 0 when at least one test passed and none failed or were flaky, and 1 otherwise, so a folder where every test is skipped returns 1.
+`verify` runs the converted specs in a folder written by `migrate` with Playwright, five times each by default (`--repeat-each <n>`) and with no retries. It needs `@playwright/test` and the Chromium browser installed where the folder is. It prints the passed, failed and skipped runs per spec file and writes the counts into `migration-report.json` and `migration-report.md`. Blocked tests are `test.fixme`, so they are counted as skipped. The exit code is 0 when at least one test passed and none failed or were flaky, and 1 otherwise, so a folder where every test is skipped returns 1. Run it on a folder written by a folder run of `migrate`, because only a folder run writes the `playwright.config.ts` that `verify` needs.
+
+## Example
+
+These are real runs of version 0.1.0 on the SauceDemo fixtures in this repo. Cypress JS source, `fixtures/saucedemo/cases/login-success/cypress-js/login-success.cy.js`:
+
+```js
+describe('Login', () => {
+  beforeEach(() => {
+    cy.visit('https://www.saucedemo.com/');
+  });
+
+  it('logs in with the standard user', () => {
+    cy.get('[data-test="username"]').type('standard_user');
+    cy.get('[data-test="password"]').type('secret_sauce');
+    cy.get('[data-test="login-button"]').click();
+    cy.url().should('include', '/inventory.html');
+    cy.get('[data-test="title"]').should('have.text', 'Products');
+  });
+});
+```
+
+```sh
+npx playwright-migrate migrate fixtures/saucedemo/cases/login-success/cypress-js/login-success.cy.js --out .demo/readme1
+```
+
+```text
+Wrote .demo/readme1/login-success.spec.ts
+Wrote .demo/readme1/migration-report.json
+Wrote .demo/readme1/migration-report.md
+login-success.cy.js: converted, 1 test(s), INFO 2, WARN 0, BLOCK 0
+```
+
+The written `login-success.spec.ts`:
+
+```ts
+// Migrated from: login-success.cy.js
+import { test, expect } from '@playwright/test';
+
+test.describe('Login', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
+  });
+
+  test('logs in with the standard user', async ({ page }) => {
+    await page.locator('[data-test="username"]').fill('standard_user');
+    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="login-button"]').click();
+    await expect(page).toHaveURL(/\/inventory\.html/);
+    await expect(page.locator('[data-test="title"]')).toHaveText('Products');
+  });
+});
+```
+
+The two INFO flags in the report say that `type` became `fill`, which replaces the field value in one step.
+
+A folder run, then `verify`:
+
+```sh
+npx playwright-migrate migrate fixtures/saucedemo/cases --from cypress-js --out .demo/readme
+npx playwright-migrate verify .demo/readme
+```
+
+The last line of `migrate` (the Wrote, Skipped and per-file lines are left out here):
+
+```text
+Files: 6 (converted 6, with warnings 0, blocked 0), skipped 12. Exit code 0.
+```
+
+The output of `verify`:
+
+```text
+Running Playwright in .demo/readme with --repeat-each=5 and retries 0.
+add-to-cart/cypress-js/add-to-cart.spec.ts: 5 passed, 0 failed, 0 skipped of 5 runs
+cart-badge/cypress-js/cart-badge.spec.ts: 5 passed, 0 failed, 0 skipped of 5 runs
+checkout-complete/cypress-js/checkout-complete.spec.ts: 5 passed, 0 failed, 0 skipped of 5 runs
+login-locked-out/cypress-js/login-locked-out.spec.ts: 5 passed, 0 failed, 0 skipped of 5 runs
+login-success/cypress-js/login-success.spec.ts: 5 passed, 0 failed, 0 skipped of 5 runs
+sort-products/cypress-js/sort-products.spec.ts: 5 passed, 0 failed, 0 skipped of 5 runs
+Updated .demo/readme/migration-report.json and .demo/readme/migration-report.md
+Verified with --repeat-each=5: 30 runs, 30 passed, 0 failed, 0 skipped, 0 flaky.
+```
+
+The same folder run with `--from selenium-python` or `--from selenium-java` also converts 6 files with nothing blocked, and `verify` gives 30 passed of 30 runs for each. The skipped files in the run above are the Selenium files, which `--from cypress-js` leaves out.
 
 ## Library Use
 
@@ -110,7 +190,7 @@ console.log(plan.report.summary);
 
 ## Development
 
-Requires Node.js 22.13 or later.
+Requires Node.js 22.13 or later. To work on the tool itself, clone the repo and run `npm ci` and `npm run build`.
 
 | Script                    | What It Does                                                                                                                                                                   |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -127,9 +207,14 @@ Requires Node.js 22.13 or later.
 | `npm run e2e:expected:5x` | Runs the expected Playwright specs five times each.                                                                                                                            |
 | `npm run demo:verify`     | Converts the SauceDemo cases once per source framework into `.demo/` and runs `verify` on each folder. Run `npm run build` first. Needs network access.                        |
 | `npm run docs:generate`   | Builds, then regenerates `docs/mapping.md` and the blocked pattern list in this README from the rule catalog and the mapping tables.                                           |
+| `npm run release:check`   | Checks that a tag, for example `v0.1.0`, matches `package.json` and the CHANGELOG, and that the package is set up to publish. The Release workflow runs it.                    |
 | `npm run check`           | Runs lint, format check, style check, typecheck and tests.                                                                                                                     |
 
 Before running the expected specs for the first time, install Chromium with `npx playwright install chromium`.
+
+## Releasing
+
+Changes are listed in [CHANGELOG.md](CHANGELOG.md). To release, a maintainer pushes a tag `v<version>` that matches the version in `package.json`. The Release workflow (`.github/workflows/release.yml`) checks the tag with `npm run release:check`, runs every check, the expected specs and the demo suites, and then publishes to npm with provenance.
 
 ## Fixtures
 
