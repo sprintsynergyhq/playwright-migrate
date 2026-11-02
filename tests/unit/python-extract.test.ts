@@ -342,7 +342,7 @@ describe('selenium-python extractor', () => {
     expect(r.tests).toEqual([
       'test_param: blocked',
       'TestS > TestInner > test_inner: blocked',
-      'TestS > test_kept: converted',
+      'TestS > test_kept: blocked',
     ]);
     expect(r.counts.tests).toBe(3);
     expect(r.counts.sourceAssertions).toBe(3);
@@ -351,6 +351,48 @@ describe('selenium-python extractor', () => {
     expect(r.spec).toContain('// Source lines 3-4:\n//   def login(driver):\n');
     expect(r.spec).toContain('Class member class TestInner is not converted.');
     expect(r.status).toBe('blocked');
+  });
+
+  it('marks every test fixme when setup outside the tests is dropped', async () => {
+    const text = [
+      'import unittest',
+      'from selenium import webdriver',
+      'from selenium.webdriver.common.by import By',
+      '',
+      'class T(unittest.TestCase):',
+      '    @classmethod',
+      '    def setUpClass(cls):',
+      '        cls.base = "https://www.saucedemo.com/"',
+      '',
+      '    def setUp(self):',
+      '        self.driver = webdriver.Chrome()',
+      '',
+      '    def test_kept(self):',
+      '        self.driver.get("https://www.saucedemo.com/")',
+      '',
+    ].join('\n');
+    const r = await convert(text);
+    expect(r.flags).toEqual(['BLOCK CORE_UNSUPPORTED_MEMBER 6', 'INFO CORE_DRIVER_LIFECYCLE 11']);
+    expect(r.tests).toEqual(['T > test_kept: blocked']);
+    expect(r.spec).toContain("test.fixme('test_kept'");
+    expect(r.spec).toContain('// playwright-migrate: code outside this test was not converted');
+    expect(r.spec).not.toMatch(/^\s*test\('/m);
+  });
+
+  it('marks every test fixme when a module-level statement is dropped', async () => {
+    const text = [
+      'from selenium import webdriver',
+      'from selenium.webdriver.common.by import By',
+      'driver = webdriver.Chrome()',
+      'driver.get("https://www.saucedemo.com/")',
+      '',
+      'def test_x(driver):',
+      '    driver.get("https://www.saucedemo.com/")',
+      '',
+    ].join('\n');
+    const r = await convert(text);
+    expect(r.tests).toEqual(['test_x: blocked']);
+    expect(r.spec).toContain("test.fixme('test_x'");
   });
 
   it('blocks a test that takes a parameter that is not a driver fixture', async () => {
