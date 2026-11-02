@@ -23,6 +23,7 @@ Target: Playwright Test in TypeScript.
 - A report of what was not converted: every step is listed as converted, converted with a note, or blocked.
 - Blocked tests are emitted as `test.fixme`, with the original source kept as a comment, so a blocked test can never pass.
 - A source test that cannot be read at all, for example a Cypress test whose callback takes a `done` parameter, is not emitted. Its source is printed as a comment under the import, the report lists it as blocked, and its assertions are counted as blocked.
+- Code outside the tests that is not converted, for example a module-level statement, a `setUpClass` method or another class member, adds a BLOCK flag. Every test in that file is then emitted as `test.fixme` and listed as blocked, because that code may set up state the tests need.
 - `it.only` and `describe.only` are converted without `.only` and get a WARN flag, because `test.only` would skip every other test in the run. `xit`, `xdescribe` and `.skip` become `test.skip` and `test.describe.skip`.
 
 ## Usage
