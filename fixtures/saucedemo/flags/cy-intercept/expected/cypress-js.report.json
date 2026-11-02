@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "source": "cypress-js/intercept.cy.js",
+  "framework": "cypress-js",
+  "status": "blocked",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 1,
+    "outputExpects": 1,
+    "blockedAssertions": 0,
+    "info": 2,
+    "warn": 0,
+    "block": 2
+  },
+  "tests": [
+    {
+      "title": "Network Stub > waits for an intercepted request",
+      "status": "blocked"
+    }
+  ],
+  "flags": [
+    {
+      "level": "BLOCK",
+      "ruleId": "CY_INTERCEPT",
+      "line": 3
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 5
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 6
+    },
+    {
+      "level": "BLOCK",
+      "ruleId": "CY_ALIAS",
+      "line": 8
+    }
+  ]
+}

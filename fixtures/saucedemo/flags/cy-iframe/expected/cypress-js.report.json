@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "source": "cypress-js/iframe.cy.js",
+  "framework": "cypress-js",
+  "status": "blocked",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 0,
+    "outputExpects": 0,
+    "blockedAssertions": 0,
+    "info": 0,
+    "warn": 0,
+    "block": 1
+  },
+  "tests": [
+    {
+      "title": "Iframe Access > clicks a button inside an iframe",
+      "status": "blocked"
+    }
+  ],
+  "flags": [
+    {
+      "level": "BLOCK",
+      "ruleId": "CY_UNSUPPORTED_COMMAND",
+      "line": 4
+    }
+  ]
+}
