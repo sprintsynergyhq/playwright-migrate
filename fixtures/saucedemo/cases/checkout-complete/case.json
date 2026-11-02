@@ -1,0 +1,12 @@
+{
+  "id": "checkout-complete",
+  "title": "Standard User Completes Checkout",
+  "intent": "A standard user buys one item: cart, checkout information, overview, finish, and sees the order confirmation.",
+  "app": "https://www.saucedemo.com",
+  "sources": {
+    "cypress-js": "cypress-js/checkout-complete.cy.js",
+    "selenium-python": "selenium-python/test_checkout_complete.py",
+    "selenium-java": "selenium-java/CheckoutCompleteTest.java"
+  },
+  "expectCount": 3
+}

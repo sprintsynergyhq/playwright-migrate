@@ -4,7 +4,7 @@
 
 ## Status
 
-This is the project scaffold. Only the `detect` command works today. The `migrate` command is a placeholder that exits with code 1 and says conversion is not implemented yet.
+Early development. `detect` works for all three sources. `migrate` converts one Cypress JS file at a time. Selenium Python, Selenium Java and folder input are not supported yet.
 
 ## Planned Sources And Target
 
@@ -37,23 +37,29 @@ npx playwright-migrate detect <path>
 
 `detect` prints the detected framework for each source file under `<path>` and a summary line. Add `--json` to print the result as JSON.
 
+```sh
+npx playwright-migrate migrate path/to/login.cy.js --out playwright-migrated
+```
+
+`migrate` writes `login.spec.ts`, `migration-report.json` and `migration-report.md` to the `--out` folder (default `playwright-migrated`). Add `--dry-run` to print the file names without writing anything. The exit code is 0 when nothing is blocked, 2 when at least one test is blocked, and 1 on an error.
+
 ## Development
 
 Requires Node.js 22.13 or later.
 
-| Script                    | What It Does                                                         |
-| ------------------------- | -------------------------------------------------------------------- |
-| `npm run build`           | Compiles `src/` to `dist/`.                                          |
-| `npm run typecheck`       | Type-checks the source, tests, expected specs and config files.      |
-| `npm run lint`            | Runs ESLint.                                                         |
-| `npm run format`          | Formats the repo with Prettier.                                      |
-| `npm run format:check`    | Checks formatting with Prettier.                                     |
-| `npm run check:style`     | Fails if any tracked file contains an em dash or an en dash.         |
-| `npm test`                | Runs the unit and golden layout tests with Vitest.                   |
-| `npm run test:smoke`      | Runs the built CLI with `--version` and `detect fixtures/saucedemo`. |
-| `npm run e2e:expected`    | Runs the expected Playwright specs against SauceDemo in Chromium.    |
-| `npm run e2e:expected:5x` | Runs the expected Playwright specs five times each.                  |
-| `npm run check`           | Runs lint, format check, style check, typecheck and tests.           |
+| Script                    | What It Does                                                                        |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| `npm run build`           | Compiles `src/` to `dist/`.                                                         |
+| `npm run typecheck`       | Type-checks the source, tests, expected specs and config files.                     |
+| `npm run lint`            | Runs ESLint.                                                                        |
+| `npm run format`          | Formats the repo with Prettier.                                                     |
+| `npm run format:check`    | Checks formatting with Prettier.                                                    |
+| `npm run check:style`     | Fails if any tracked file contains an em dash or an en dash.                        |
+| `npm test`                | Runs the unit and golden layout tests with Vitest.                                  |
+| `npm run test:smoke`      | Runs the built CLI: `--version`, `detect`, a parse check and a `migrate --dry-run`. |
+| `npm run e2e:expected`    | Runs the expected Playwright specs against SauceDemo in Chromium.                   |
+| `npm run e2e:expected:5x` | Runs the expected Playwright specs five times each.                                 |
+| `npm run check`           | Runs lint, format check, style check, typecheck and tests.                          |
 
 Before running the expected specs for the first time, install Chromium with `npx playwright install chromium`.
 
