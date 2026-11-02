@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "source": "cypress-js/login-success.cy.js",
+  "framework": "cypress-js",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 2,
+    "outputExpects": 2,
+    "blockedAssertions": 0,
+    "info": 2,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "Login > logs in with the standard user",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 7
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 8
+    }
+  ]
+}

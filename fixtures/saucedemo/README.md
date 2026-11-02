@@ -34,3 +34,11 @@ The future emitter must match these rules exactly.
 - A URL that contains `/inventory.html` becomes `await expect(page).toHaveURL(/\/inventory\.html/);`.
 - Exact text equality becomes `toHaveText`, contains becomes `toContainText`, and a visibility wait or `be.visible` becomes `toBeVisible`.
 - Every action and assertion is awaited. Strings use single quotes. Files are formatted with Prettier using the repo config.
+
+## Expected Report Files
+
+- Each case has `expected/<framework>.report.json` next to the expected spec. It is the golden report: the status, the counts, the test titles with their status, and the flags as level, rule ID and source line, sorted by line and then by rule ID.
+- Test titles join the suite and test names with a space, `>` and a space, for example `Login > logs in with the standard user`.
+- `sourceAssertions` counts the assertions in the source. Cypress counts `.should`, `.and` and chai `expect(` calls. Python counts `assert` statements and `self.assert*` calls. Java counts calls whose name starts with `assert`.
+- `outputExpects` counts the `expect` calls in the expected spec. It includes waits that became assertions, so it can be larger than `sourceAssertions`.
+- The files are written by hand and must agree with `case.json` (`outputExpects` equals `expectCount`).

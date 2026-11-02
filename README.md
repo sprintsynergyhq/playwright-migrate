@@ -25,7 +25,9 @@ Target: Playwright Test in TypeScript.
 
 ## Usage
 
-The package is not published yet. Build it locally, then run the CLI from the repo folder:
+The package is not published yet. The npm package will be published as `@sprintsynergy/playwright-migrate`. The command it installs is `playwright-migrate`.
+
+Build it locally, then run the CLI from the repo folder:
 
 ```sh
 npm ci
