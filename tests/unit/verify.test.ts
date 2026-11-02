@@ -119,7 +119,7 @@ describe('verify', () => {
     expect(verificationPassed(v)).toBe(false);
   });
 
-  it('passes only when something ran and nothing failed', async () => {
+  it('passes only when a test passed and nothing failed', async () => {
     const report = await sampleReport(['x.spec.ts']);
     const ok = buildVerification(
       report,
@@ -128,6 +128,12 @@ describe('verify', () => {
     );
     expect(verificationPassed(ok)).toBe(true);
     expect(verificationPassed(buildVerification(report, new Map(), 5))).toBe(false);
+    const onlySkipped = buildVerification(
+      report,
+      new Map([['x.spec.ts', { runs: 5, passed: 0, failed: 0, skipped: 5, flaky: 0 }]]),
+      5,
+    );
+    expect(verificationPassed(onlySkipped)).toBe(false);
   });
 
   it('a report with verification matches the JSON schema and renders a Verification section', async () => {

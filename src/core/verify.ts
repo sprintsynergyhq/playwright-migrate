@@ -93,7 +93,10 @@ export function buildVerification(
   return { repeatEach, totals, files, unreported };
 }
 
-/** True when at least one test ran and none failed or was flaky. */
+/**
+ * True when at least one test ran and passed, and none failed or was flaky. Skipped runs,
+ * such as blocked tests emitted as test.fixme, do not count as a test that ran.
+ */
 export function verificationPassed(v: Verification): boolean {
-  return v.totals.runs > 0 && v.totals.failed === 0 && v.totals.flaky === 0;
+  return v.totals.passed > 0 && v.totals.failed === 0 && v.totals.flaky === 0;
 }

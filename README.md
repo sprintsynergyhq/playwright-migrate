@@ -59,7 +59,7 @@ For a folder, `migrate` converts every Cypress JS, Selenium Python and Selenium 
 npx playwright-migrate verify playwright-migrated
 ```
 
-`verify` runs the converted specs in a folder written by `migrate` with Playwright, five times each by default (`--repeat-each <n>`) and with no retries. It needs `@playwright/test` and the Chromium browser installed where the folder is. It prints the passed, failed and skipped runs per spec file and writes the counts into `migration-report.json` and `migration-report.md`. Blocked tests are `test.fixme`, so they are counted as skipped. The exit code is 0 when at least one test ran and none failed or were flaky, and 1 otherwise.
+`verify` runs the converted specs in a folder written by `migrate` with Playwright, five times each by default (`--repeat-each <n>`) and with no retries. It needs `@playwright/test` and the Chromium browser installed where the folder is. It prints the passed, failed and skipped runs per spec file and writes the counts into `migration-report.json` and `migration-report.md`. Blocked tests are `test.fixme`, so they are counted as skipped. The exit code is 0 when at least one test passed and none failed or were flaky, and 1 otherwise, so a folder where every test is skipped returns 1.
 
 ## Library Use
 
