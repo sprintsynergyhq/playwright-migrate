@@ -1,0 +1,11 @@
+{
+  "id": "py-execute-script",
+  "title": "Python JavaScript Executor Is Blocked",
+  "intent": "driver.execute_script is not converted, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "selenium-python",
+  "source": "selenium-python/test_execute_script.py",
+  "expectedStatus": "blocked",
+  "rules": ["CORE_JS_EXECUTOR"],
+  "runnable": false
+}

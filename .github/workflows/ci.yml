@@ -28,6 +28,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run test:smoke
+      - run: npm run test:pack
   expected-specs-e2e:
     needs: check
     runs-on: ubuntu-latest
@@ -40,6 +41,10 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e:expected:5x
+        env:
+          CI: 'true'
+      - run: npm run build
+      - run: npm run demo:verify
         env:
           CI: 'true'
       - uses: actions/upload-artifact@v4

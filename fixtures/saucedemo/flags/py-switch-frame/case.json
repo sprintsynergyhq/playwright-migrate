@@ -1,0 +1,11 @@
+{
+  "id": "py-switch-frame",
+  "title": "Python Frame Switch Is Blocked",
+  "intent": "Steps from switch_to.frame up to switch_to.default_content are blocked, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "selenium-python",
+  "source": "selenium-python/test_switch_frame.py",
+  "expectedStatus": "blocked",
+  "rules": ["CORE_FRAME"],
+  "runnable": false
+}

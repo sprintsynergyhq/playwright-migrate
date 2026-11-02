@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-python/test_sort_products.py",
+  "framework": "selenium-python",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 3,
+    "outputExpects": 3,
+    "blockedAssertions": 0,
+    "info": 5,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "TestSortProducts > test_sort_by_price_low_to_high",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 8
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 10
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 11
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 15
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_STORED_ELEMENT",
+      "line": 20
+    }
+  ]
+}

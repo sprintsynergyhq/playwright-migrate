@@ -1,0 +1,11 @@
+{
+  "id": "cy-iframe",
+  "title": "Cypress Iframe Access Is Blocked",
+  "intent": "Reaching into an iframe with .its() is not converted, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "cypress-js",
+  "source": "cypress-js/iframe.cy.js",
+  "expectedStatus": "blocked",
+  "rules": ["CY_UNSUPPORTED_COMMAND"],
+  "runnable": false
+}

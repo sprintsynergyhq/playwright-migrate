@@ -1,0 +1,11 @@
+{
+  "id": "java-switch-frame",
+  "title": "Java Frame Switch Is Blocked",
+  "intent": "Steps from switchTo().frame up to switchTo().defaultContent are blocked, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "selenium-java",
+  "source": "selenium-java/SwitchFrameTest.java",
+  "expectedStatus": "blocked",
+  "rules": ["CORE_FRAME"],
+  "runnable": false
+}

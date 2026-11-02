@@ -1,0 +1,11 @@
+{
+  "id": "py-time-sleep",
+  "title": "Python Sleep Is Kept With A Warning",
+  "intent": "time.sleep(1) is kept as waitForTimeout(1000) with a WARN flag, and the test still runs.",
+  "app": "https://www.saucedemo.com",
+  "framework": "selenium-python",
+  "source": "selenium-python/test_fixed_wait.py",
+  "expectedStatus": "converted_with_warnings",
+  "rules": ["CORE_FIXED_WAIT"],
+  "runnable": true
+}

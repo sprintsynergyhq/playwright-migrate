@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-python/test_checkout_complete.py",
+  "framework": "selenium-python",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 2,
+    "outputExpects": 3,
+    "blockedAssertions": 0,
+    "info": 9,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "TestCheckoutComplete > test_complete_checkout_for_one_item",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 9
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_IMPLICIT_WAIT",
+      "line": 10
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 13
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 17
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 18
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 23
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 24
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 25
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_CLICKABLE_WAIT_REMOVED",
+      "line": 28
+    }
+  ]
+}

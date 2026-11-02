@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sprintsynergyhq/playwright-migrate/schemas/golden-report.schema.json",
+  "title": "playwright-migrate Golden Report",
+  "description": "The stable part of a file report, compared in golden tests. Messages, step lists and output paths are left out on purpose.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "source", "framework", "status", "counts", "tests", "flags"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "source": { "type": "string", "minLength": 1 },
+    "framework": { "enum": ["cypress-js", "selenium-python", "selenium-java"] },
+    "status": { "enum": ["converted", "converted_with_warnings", "blocked"] },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tests",
+        "sourceAssertions",
+        "outputExpects",
+        "blockedAssertions",
+        "info",
+        "warn",
+        "block"
+      ],
+      "properties": {
+        "tests": { "type": "integer", "minimum": 0 },
+        "sourceAssertions": { "type": "integer", "minimum": 0 },
+        "outputExpects": { "type": "integer", "minimum": 0 },
+        "blockedAssertions": { "type": "integer", "minimum": 0 },
+        "info": { "type": "integer", "minimum": 0 },
+        "warn": { "type": "integer", "minimum": 0 },
+        "block": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "status"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["converted", "converted_with_warnings", "blocked"] }
+        }
+      }
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["level", "ruleId", "line"],
+        "properties": {
+          "level": { "enum": ["INFO", "WARN", "BLOCK"] },
+          "ruleId": { "type": "string", "pattern": "^[A-Z]+(_[A-Z]+)+$" },
+          "line": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  }
+}

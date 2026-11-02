@@ -1,0 +1,12 @@
+{
+  "id": "cart-badge",
+  "title": "Cart Badge Counts Items",
+  "intent": "The cart badge shows 1, then 2, then 1 as items are added and removed, and disappears when the cart is empty.",
+  "app": "https://www.saucedemo.com",
+  "sources": {
+    "cypress-js": "cypress-js/cart-badge.cy.js",
+    "selenium-python": "selenium-python/test_cart_badge.py",
+    "selenium-java": "selenium-java/CartBadgeTest.java"
+  },
+  "expectCount": 4
+}

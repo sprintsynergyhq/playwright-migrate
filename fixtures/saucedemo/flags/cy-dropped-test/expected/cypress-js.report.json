@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "source": "cypress-js/dropped-test.cy.js",
+  "framework": "cypress-js",
+  "status": "blocked",
+  "counts": {
+    "tests": 2,
+    "sourceAssertions": 2,
+    "outputExpects": 1,
+    "blockedAssertions": 1,
+    "info": 0,
+    "warn": 0,
+    "block": 1
+  },
+  "tests": [
+    {
+      "title": "Dropped Test > shows the login button",
+      "status": "converted"
+    },
+    {
+      "title": "Dropped Test > uses a done callback",
+      "status": "blocked"
+    }
+  ],
+  "flags": [
+    {
+      "level": "BLOCK",
+      "ruleId": "CORE_UNKNOWN_STATEMENT",
+      "line": 7
+    }
+  ]
+}

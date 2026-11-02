@@ -1,0 +1,11 @@
+{
+  "id": "cy-wait-time",
+  "title": "Cypress Fixed Wait Is Kept With A Warning",
+  "intent": "A fixed cy.wait(500) is kept as waitForTimeout with a WARN flag, and the test still runs.",
+  "app": "https://www.saucedemo.com",
+  "framework": "cypress-js",
+  "source": "cypress-js/wait-time.cy.js",
+  "expectedStatus": "converted_with_warnings",
+  "rules": ["CORE_FIXED_WAIT"],
+  "runnable": true
+}

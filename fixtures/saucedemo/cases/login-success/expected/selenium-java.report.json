@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-java/LoginSuccessTest.java",
+  "framework": "selenium-java",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 2,
+    "outputExpects": 2,
+    "blockedAssertions": 0,
+    "info": 4,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "LoginSuccessTest > loginWithStandardUser",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 18
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 24
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 29
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 30
+    }
+  ]
+}

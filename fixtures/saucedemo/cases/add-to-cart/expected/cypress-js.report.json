@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "source": "cypress-js/add-to-cart.cy.js",
+  "framework": "cypress-js",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 4,
+    "outputExpects": 4,
+    "blockedAssertions": 0,
+    "info": 2,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "Cart > adds the backpack to the cart",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 4
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 5
+    }
+  ]
+}

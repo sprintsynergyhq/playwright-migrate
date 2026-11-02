@@ -1,0 +1,11 @@
+{
+  "id": "java-thread-sleep",
+  "title": "Java Sleep Is Kept With A Warning",
+  "intent": "Thread.sleep(500) is kept as waitForTimeout(500) with a WARN flag, and the test still runs.",
+  "app": "https://www.saucedemo.com",
+  "framework": "selenium-java",
+  "source": "selenium-java/FixedWaitTest.java",
+  "expectedStatus": "converted_with_warnings",
+  "rules": ["CORE_FIXED_WAIT"],
+  "runnable": true
+}

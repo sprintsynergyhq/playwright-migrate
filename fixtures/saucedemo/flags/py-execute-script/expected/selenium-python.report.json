@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-python/test_execute_script.py",
+  "framework": "selenium-python",
+  "status": "blocked",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 1,
+    "outputExpects": 1,
+    "blockedAssertions": 0,
+    "info": 3,
+    "warn": 0,
+    "block": 1
+  },
+  "tests": [
+    {
+      "title": "test_scrolls_with_javascript",
+      "status": "blocked"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 6
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 15
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 16
+    },
+    {
+      "level": "BLOCK",
+      "ruleId": "CORE_JS_EXECUTOR",
+      "line": 18
+    }
+  ]
+}

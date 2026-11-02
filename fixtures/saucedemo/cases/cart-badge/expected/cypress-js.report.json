@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "source": "cypress-js/cart-badge.cy.js",
+  "framework": "cypress-js",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 4,
+    "outputExpects": 4,
+    "blockedAssertions": 0,
+    "info": 3,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "Cart Badge > counts items as they are added and removed",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 4
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 5
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CY_WITHIN",
+      "line": 14
+    }
+  ]
+}

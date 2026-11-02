@@ -10,6 +10,8 @@ export default defineConfig(
       'playwright-report/',
       'test-results/',
       'coverage/',
+      'playwright-migrated/',
+      '.demo/',
       'fixtures/**/cypress-js/',
       'fixtures/**/selenium-python/',
       'fixtures/**/selenium-java/',
