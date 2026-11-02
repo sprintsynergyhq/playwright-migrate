@@ -34,7 +34,7 @@ function readReport(file: string): RunReport | undefined {
 }
 
 // Runs the converted specs in a folder written by `migrate <folder>` and adds the run counts
-// to its reports. Returns 0 when at least one test ran and none failed, 1 otherwise.
+// to its reports. Returns 0 when at least one test passed and none failed or was flaky, 1 otherwise.
 export function runVerify(dir: string | undefined, opts: VerifyOptions, io: Io): number {
   const shown = dir ?? DEFAULT_OUT_DIR;
   const root = path.resolve(shown);

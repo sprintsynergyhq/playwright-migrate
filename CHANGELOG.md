@@ -17,6 +17,6 @@ First release.
   - A folder run mirrors the folder layout and writes a `playwright.config.ts` (Chromium, retries 0). `--from` limits the run to one framework, `--dry-run` writes nothing, and `--force` overwrites existing files.
   - Writes `migration-report.json` (with a JSON schema in `schemas/`) and `migration-report.md`, with an INFO, WARN or BLOCK flag for every step that needs attention.
   - Exit codes: 0 when nothing is blocked, 2 when a test is blocked, 1 on an error.
-- `verify`: runs the converted specs of a migrated folder with Playwright, five times each by default with no retries, and adds the counts to both reports. Exit code 0 only when at least one test ran and none failed or were flaky.
+- `verify`: runs the converted specs of a migrated folder with Playwright, five times each by default with no retries, and adds the counts to both reports. Exit code 0 only when at least one test passed and none failed or were flaky.
 - Library API with type declarations, including `convertSource`, `planMigration` and `writeMigration`.
 - `docs/mapping.md`, the mapping reference generated from the rule catalog and the mapping tables.
