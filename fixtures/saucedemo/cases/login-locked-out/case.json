@@ -1,0 +1,12 @@
+{
+  "id": "login-locked-out",
+  "title": "Locked Out User Sees An Error",
+  "intent": "A locked out user tries to sign in and sees the locked out error message.",
+  "app": "https://www.saucedemo.com",
+  "sources": {
+    "cypress-js": "cypress-js/login-locked-out.cy.js",
+    "selenium-python": "selenium-python/test_login_locked_out.py",
+    "selenium-java": "selenium-java/LoginLockedOutTest.java"
+  },
+  "expectCount": 2
+}
