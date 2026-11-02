@@ -150,6 +150,10 @@ describe('cypress-js extractor', () => {
         "// Source line 1: const user = 'standard_user';",
       ].join('\n'),
     );
+    // The dropped top-level code may set up state for the test, so the test must not run.
+    expect(r.tests).toEqual(['S > t: blocked']);
+    expect(r.spec).toContain("test.fixme('t'");
+    expect(r.spec).toContain('// playwright-migrate: code outside this test was not converted');
   });
 
   it('lists and counts a dropped test and its assertions', async () => {

@@ -13,7 +13,7 @@ import type {
   SuiteItem,
   Test,
 } from '../core/ir.js';
-import { collectTests, deriveTestStatus } from '../core/status.js';
+import { collectTests, deriveTestStatus, hasBlockedSetup } from '../core/status.js';
 
 export const PRETTIER_OPTIONS = {
   parser: 'typescript',
@@ -194,7 +194,12 @@ export function isHookEmitted(hook: Hook): boolean {
   return hook.steps.some((s) => s.kind !== 'removed');
 }
 
+// Put at the top of every test when code outside the tests was dropped with a BLOCK flag.
+export const SETUP_BLOCKED_COMMENT =
+  '// playwright-migrate: code outside this test was not converted, so the test is marked fixme. See the BLOCK flags at the top of the file.';
+
 export function emitPlaywrightRaw(file: MigrationFile): string {
+  const setupBlocked = hasBlockedSetup(file);
   const blockedTests = new Set<Test>(
     collectTests(file)
       .filter((t) => deriveTestStatus(t) === 'blocked')
@@ -215,7 +220,8 @@ export function emitPlaywrightRaw(file: MigrationFile): string {
         const b = body(t.steps);
         usesExpect ||= b.usesExpect;
         const fn = blockedTests.has(t) ? 'test.fixme' : t.skipped ? 'test.skip' : 'test';
-        chunks.push([`${fn}(${str(t.name)}, ${fixtureArg(b)} {`, ...b.lines, '});']);
+        const lines = setupBlocked ? [SETUP_BLOCKED_COMMENT, ...b.lines] : b.lines;
+        chunks.push([`${fn}(${str(t.name)}, ${fixtureArg(b)} {`, ...lines, '});']);
       } else {
         const s = item.suite;
         const fn = s.skipped ? 'test.describe.skip' : 'test.describe';

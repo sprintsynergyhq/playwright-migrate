@@ -337,8 +337,10 @@ describe('selenium-java extractor', () => {
     expect(r.tests).toEqual([
       'DropTest > Inner > inner: blocked',
       'DropTest > param: blocked',
-      'DropTest > kept: converted',
+      'DropTest > kept: blocked',
     ]);
+    expect(r.spec).toContain("test.fixme('kept'");
+    expect(r.spec).not.toMatch(/^\s*test\('/m);
     expect(r.counts.tests).toBe(3);
     expect(r.counts.sourceAssertions).toBe(4);
     expect(r.counts.blockedAssertions).toBe(4);
