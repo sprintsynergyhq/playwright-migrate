@@ -13,6 +13,7 @@ First release.
   - Cypress JS: visits, element actions, `should` and `and` assertions, chains, `within`, `it.only` and `describe.only` (converted without `.only`, with a WARN flag), skips, and `beforeEach` and `afterEach` hooks.
   - Selenium Python with pytest and unittest, and Selenium Java with JUnit 5 and TestNG: locators, actions, explicit waits, keys and assertions. Driver setup and teardown are removed.
   - Blocked steps (for example `cy.intercept`, aliases, custom commands, frames, windows and JavaScript executor calls) are never guessed. The test is emitted as `test.fixme` with its source kept as a comment, so it cannot pass.
+  - When code outside the tests is not converted, such as a module-level statement, `setUpClass`, `@BeforeAll` or another class member, every test in that file is emitted as `test.fixme`, because that code may set up state the tests need.
   - A folder run mirrors the folder layout and writes a `playwright.config.ts` (Chromium, retries 0). `--from` limits the run to one framework, `--dry-run` writes nothing, and `--force` overwrites existing files.
   - Writes `migration-report.json` (with a JSON schema in `schemas/`) and `migration-report.md`, with an INFO, WARN or BLOCK flag for every step that needs attention.
   - Exit codes: 0 when nothing is blocked, 2 when a test is blocked, 1 on an error.
