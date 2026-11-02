@@ -34,3 +34,5 @@ export {
 export type { MigrationOptions, MigrationPlan, PlannedFile } from './core/migrate.js';
 export { PLAYWRIGHT_CONFIG_FILE, renderPlaywrightConfig } from './emit/config.js';
 export { specFileName } from './sources/index.js';
+export { buildVerification, countRuns, topLevelErrors, verificationPassed } from './core/verify.js';
+export type { FileVerification, RunCounts, Verification } from './core/verify.js';

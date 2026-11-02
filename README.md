@@ -55,6 +55,12 @@ For a folder, `migrate` converts every Cypress JS, Selenium Python and Selenium 
 
 `migrate` never overwrites a file by default. When an output file already exists, it lists the files, writes nothing and exits with 1. Add `--force` to overwrite them.
 
+```sh
+npx playwright-migrate verify playwright-migrated
+```
+
+`verify` runs the converted specs in a folder written by `migrate` with Playwright, five times each by default (`--repeat-each <n>`) and with no retries. It needs `@playwright/test` and the Chromium browser installed where the folder is. It prints the passed, failed and skipped runs per spec file and writes the counts into `migration-report.json` and `migration-report.md`. Blocked tests are `test.fixme`, so they are counted as skipped. The exit code is 0 when at least one test passed and none failed or were flaky, and 1 otherwise, so a folder where every test is skipped returns 1.
+
 ## Library Use
 
 The package also exports its API, with type declarations:
@@ -86,6 +92,7 @@ Requires Node.js 22.13 or later.
 | `npm run test:pack`       | Builds and packs the package, checks the tarball for stale build output, installs it into a temp folder, imports the API and runs the installed command. Needs network access. |
 | `npm run e2e:expected`    | Runs the expected Playwright specs against SauceDemo in Chromium.                                                                                                              |
 | `npm run e2e:expected:5x` | Runs the expected Playwright specs five times each.                                                                                                                            |
+| `npm run demo:verify`     | Converts the SauceDemo cases once per source framework into `.demo/` and runs `verify` on each folder. Run `npm run build` first. Needs network access.                        |
 | `npm run check`           | Runs lint, format check, style check, typecheck and tests.                                                                                                                     |
 
 Before running the expected specs for the first time, install Chromium with `npx playwright install chromium`.

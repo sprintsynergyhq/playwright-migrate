@@ -40,7 +40,8 @@
         "block": { "$ref": "#/$defs/count" }
       }
     },
-    "exitCode": { "enum": [0, 2] }
+    "exitCode": { "enum": [0, 2] },
+    "verification": { "$ref": "#/$defs/verification" }
   },
   "$defs": {
     "count": { "type": "integer", "minimum": 0 },
@@ -142,6 +143,44 @@
           }
         },
         "fileFlags": { "type": "array", "items": { "$ref": "#/$defs/flag" } }
+      }
+    },
+    "runCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runs", "passed", "failed", "skipped", "flaky"],
+      "properties": {
+        "runs": { "$ref": "#/$defs/count" },
+        "passed": { "$ref": "#/$defs/count" },
+        "failed": { "$ref": "#/$defs/count" },
+        "skipped": { "$ref": "#/$defs/count" },
+        "flaky": { "$ref": "#/$defs/count" }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repeatEach", "totals", "files", "unreported"],
+      "properties": {
+        "repeatEach": { "type": "integer", "minimum": 1 },
+        "totals": { "$ref": "#/$defs/runCounts" },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["output", "runs", "passed", "failed", "skipped", "flaky"],
+            "properties": {
+              "output": { "type": "string", "minLength": 1 },
+              "runs": { "$ref": "#/$defs/count" },
+              "passed": { "$ref": "#/$defs/count" },
+              "failed": { "$ref": "#/$defs/count" },
+              "skipped": { "$ref": "#/$defs/count" },
+              "flaky": { "$ref": "#/$defs/count" }
+            }
+          }
+        },
+        "unreported": { "type": "array", "items": { "type": "string" } }
       }
     }
   }
