@@ -23,6 +23,13 @@ const LOGIN_PY = path.join(
   'selenium-python',
   'test_login_success.py',
 );
+const LOGIN_JAVA = path.join(
+  FIXTURES,
+  'cases',
+  'login-success',
+  'selenium-java',
+  'LoginSuccessTest.java',
+);
 
 const tempDir = (): string => mkdtempSync(path.join(tmpdir(), 'pwm-cli-'));
 
@@ -124,10 +131,24 @@ describe('cli', () => {
     expect(r.err).toContain('folder input is not supported yet');
   });
 
-  it('migrate on a Selenium Python file returns 1 and says it is not supported yet', async () => {
-    const r = await cli('migrate', LOGIN_PY, '--out', tempDir());
+  it('migrate on a Selenium Python file writes the expected spec', async () => {
+    const out = tempDir();
+    const r = await cli('migrate', LOGIN_PY, '--out', out);
+    expect(r.code).toBe(0);
+    const expected = readFileSync(
+      path.join(FIXTURES, 'cases', 'login-success', 'expected', 'selenium-python.spec.ts'),
+      'utf8',
+    );
+    const spec = readFileSync(path.join(out, 'test_login_success.spec.ts'), 'utf8');
+    expect(spec.split('\n')[0]).toBe('// Migrated from: test_login_success.py');
+    expect(spec.split('\n').slice(1)).toEqual(expected.split('\n').slice(1));
+    expect(r.out).toContain('test_login_success.py: converted');
+  });
+
+  it('migrate on a Selenium Java file returns 1 and says it is not supported yet', async () => {
+    const r = await cli('migrate', LOGIN_JAVA, '--out', tempDir());
     expect(r.code).toBe(1);
-    expect(r.err).toContain('conversion from selenium-python is not supported yet');
+    expect(r.err).toContain('conversion from selenium-java is not supported yet');
   });
 
   it('migrate on a file that cannot be detected returns 1', async () => {

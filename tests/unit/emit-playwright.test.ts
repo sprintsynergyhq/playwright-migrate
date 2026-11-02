@@ -14,7 +14,7 @@ import {
   expectStep,
   fill,
   fixedWait,
-  flag,
+  fileFlag,
   goto,
   hook,
   removed,
@@ -48,6 +48,7 @@ const file = (
   fileFlags: [],
   sourceAssertions: 0,
   sourceStatements: 0,
+  sourceTests: 0,
 });
 
 // The login steps shared by the WARN and BLOCK samples below.
@@ -313,7 +314,7 @@ test.describe('CustomWaitTest', () => {
         expectStep(at(18), 'urlContains', 'page', { expected: 'saucedemo' }),
       ]),
     ]);
-    f.fileFlags.push(flag('CORE_DRIVER_LIFECYCLE', 6));
+    f.fileFlags.push(fileFlag('CORE_DRIVER_LIFECYCLE', at(6, '@pytest.fixture', 10, 0)));
     expect(await emitPlaywright(f)).toBe(`// Migrated from: selenium-python/test_switch_frame.py
 import { test, expect } from '@playwright/test';
 
@@ -357,15 +358,20 @@ test.fixme('test_clicks_button_in_frame', async ({ page }) => {
       test('t', at(5), [goto(at(6), URL)]),
     ]);
     f.fileFlags.push(
-      flag('CORE_UNSUPPORTED_MEMBER', 3, { detail: 'helper()' }),
-      flag('CORE_DRIVER_LIFECYCLE', 2),
+      fileFlag('CORE_UNSUPPORTED_MEMBER', at(3, 'private void helper() {\n    }', 4), {
+        detail: 'helper()',
+      }),
+      fileFlag('CORE_DRIVER_LIFECYCLE', at(2, 'private WebDriver driver;')),
     );
     const lines = emitPlaywrightRaw(f).split('\n');
-    expect(lines.slice(0, 5)).toEqual([
+    expect(lines.slice(0, 8)).toEqual([
       '// Migrated from: selenium-java/Fields.java',
       "import { test } from '@playwright/test';",
       '',
       '// playwright-migrate BLOCK CORE_UNSUPPORTED_MEMBER: Class member helper() is not converted. Move shared setup into a hook or a fixture by hand.',
+      '// Source lines 3-4:',
+      '//   private void helper() {',
+      '//   }',
       '',
     ]);
   });

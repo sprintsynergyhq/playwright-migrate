@@ -8,11 +8,12 @@ import type {
   LocatorBase,
   LocatorChainItem,
   MigrationFile,
+  SourceSpan,
   Step,
   SuiteItem,
   Test,
 } from '../core/ir.js';
-import { collectTests, deriveTestStatus } from '../core/status.js';
+import { collectTests, deriveTestStatus, hasBlockedSetup } from '../core/status.js';
 
 export const PRETTIER_OPTIONS = {
   parser: 'typescript',
@@ -117,8 +118,8 @@ function flagComment(flag: Flag): string {
 }
 
 // The source of a blocked step as comments, dedented by the column where the statement starts.
-export function sourceComment(step: Step): string[] {
-  const { startLine, endLine, startColumn, text } = step.span;
+export function sourceComment(item: { span: SourceSpan }): string[] {
+  const { startLine, endLine, startColumn, text } = item.span;
   const lines = text.split('\n');
   if (startLine === endLine && lines.length === 1) return [`// Source line ${startLine}: ${text}`];
   const dedent = (line: string, i: number): string => {
@@ -193,7 +194,12 @@ export function isHookEmitted(hook: Hook): boolean {
   return hook.steps.some((s) => s.kind !== 'removed');
 }
 
+// Put at the top of every test when code outside the tests was dropped with a BLOCK flag.
+export const SETUP_BLOCKED_COMMENT =
+  '// playwright-migrate: code outside this test was not converted, so the test is marked fixme. See the BLOCK flags at the top of the file.';
+
 export function emitPlaywrightRaw(file: MigrationFile): string {
+  const setupBlocked = hasBlockedSetup(file);
   const blockedTests = new Set<Test>(
     collectTests(file)
       .filter((t) => deriveTestStatus(t) === 'blocked')
@@ -214,7 +220,8 @@ export function emitPlaywrightRaw(file: MigrationFile): string {
         const b = body(t.steps);
         usesExpect ||= b.usesExpect;
         const fn = blockedTests.has(t) ? 'test.fixme' : t.skipped ? 'test.skip' : 'test';
-        chunks.push([`${fn}(${str(t.name)}, ${fixtureArg(b)} {`, ...b.lines, '});']);
+        const lines = setupBlocked ? [SETUP_BLOCKED_COMMENT, ...b.lines] : b.lines;
+        chunks.push([`${fn}(${str(t.name)}, ${fixtureArg(b)} {`, ...lines, '});']);
       } else {
         const s = item.suite;
         const fn = s.skipped ? 'test.describe.skip' : 'test.describe';
@@ -224,7 +231,10 @@ export function emitPlaywrightRaw(file: MigrationFile): string {
     return chunks.flatMap((c, i) => (i === 0 ? c : ['', ...c]));
   };
 
-  const fileComments = file.fileFlags.filter((f) => f.level !== 'INFO').map(flagComment);
+  // WARN and BLOCK file flags print the rule message and the source they point to.
+  const fileComments = file.fileFlags
+    .filter((f) => f.level !== 'INFO')
+    .flatMap((f) => [flagComment(f), ...sourceComment(f)]);
   const main = items(file.items);
   const head = [
     `// Migrated from: ${file.sourcePath}`,

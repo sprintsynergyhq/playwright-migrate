@@ -107,6 +107,16 @@ export type Suite = { name: string; skipped: boolean; items: SuiteItem[]; span: 
 export type SuiteItem =
   { type: 'hook'; hook: Hook } | { type: 'test'; test: Test } | { type: 'suite'; suite: Suite };
 
+// A flag that does not belong to a step, for example a top-level statement that was dropped or a
+// removed pytest fixture. span is the source it points to: WARN and BLOCK file flags print it.
+// assertionCount is the number of source assertions inside span that are not converted.
+// droppedTests lists the title path of every source test inside span that is not emitted.
+export type FileFlag = Flag & {
+  span: SourceSpan;
+  assertionCount: number;
+  droppedTests: string[][];
+};
+
 export type MigrationFile = {
   // Path of the source file, relative to the input root, with forward slashes.
   sourcePath: string;
@@ -114,9 +124,11 @@ export type MigrationFile = {
   // Top-level items in source order.
   items: SuiteItem[];
   // Flags that do not belong to a step (for example a removed pytest fixture or a Java field).
-  fileFlags: Flag[];
+  fileFlags: FileFlag[];
   // Counted by the extractor from the syntax tree.
   sourceAssertions: number;
   // Number of statements directly inside test and hook bodies, counted by the extractor.
   sourceStatements: number;
+  // Number of tests in the source, counted by the extractor: emitted tests plus dropped tests.
+  sourceTests: number;
 };

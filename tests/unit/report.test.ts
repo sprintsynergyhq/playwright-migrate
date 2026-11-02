@@ -14,7 +14,7 @@ import {
   css,
   expectStep,
   fixedWait,
-  flag,
+  fileFlag,
   goto,
   hook,
   suite,
@@ -37,6 +37,7 @@ function mixedFile(): MigrationFile {
     framework: 'cypress-js',
     sourceAssertions: 2,
     sourceStatements: 5,
+    sourceTests: 2,
     fileFlags: [],
     items: [
       suite('Mixed', span(1, 'describe', 20), [
@@ -92,8 +93,41 @@ describe('file report', () => {
 
   it('marks a file blocked when a file flag is BLOCK', () => {
     const file = loginSuccessIr()['selenium-java'];
-    file.fileFlags.push(flag('CORE_UNSUPPORTED_MEMBER', 14, { detail: 'helper' }));
+    file.fileFlags.push(
+      fileFlag('CORE_UNSUPPORTED_MEMBER', span(14, 'private void helper() {}'), {
+        detail: 'helper',
+      }),
+    );
     expect(buildFileReport(file, null).status).toBe('blocked');
+  });
+
+  it('lists and counts dropped tests and their assertions as blocked', () => {
+    const file = mixedFile();
+    file.sourceTests = 3;
+    file.sourceAssertions = 4;
+    file.fileFlags.push(
+      fileFlag(
+        'CORE_UNKNOWN_STATEMENT',
+        span(16, "it('dropped', (done) => {\n  cy.get('#a').should('be.visible');\n});", 18),
+        undefined,
+        2,
+        [['Mixed', 'dropped']],
+      ),
+    );
+    const report = buildFileReport(file, null);
+    expect(report.counts.tests).toBe(3);
+    expect(report.counts.blockedAssertions).toBe(3);
+    expect(report.tests.map((t) => `${t.title} ${t.status}`)).toEqual([
+      'Mixed > warns converted_with_warnings',
+      'Mixed > blocks blocked',
+      'Mixed > dropped blocked',
+    ]);
+    expect(report.fileFlags[0]).toEqual({
+      level: 'BLOCK',
+      ruleId: 'CORE_UNKNOWN_STATEMENT',
+      message: 'Statement not recognized, so it was not converted. Convert it by hand.',
+      line: 16,
+    });
   });
 
   it('reports converted for the login fixtures', () => {

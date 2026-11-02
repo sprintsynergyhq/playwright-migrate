@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "source": "cypress-js/only-skip.cy.js",
+  "framework": "cypress-js",
+  "status": "converted_with_warnings",
+  "counts": {
+    "tests": 3,
+    "sourceAssertions": 3,
+    "outputExpects": 3,
+    "blockedAssertions": 0,
+    "info": 0,
+    "warn": 1,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "Only And Skip > shows the login button",
+      "status": "converted"
+    },
+    {
+      "title": "Only And Skip > shows the username field",
+      "status": "converted"
+    },
+    {
+      "title": "Only And Skip > is skipped for now",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "WARN",
+      "ruleId": "CY_ONLY",
+      "line": 4
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "cy-only-skip",
+  "title": "Cypress Only And Skip Modifiers",
+  "intent": "it.only converts to a normal test with a WARN flag, xit converts to test.skip, and an expression-bodied arrow test converts as one statement.",
+  "app": "https://www.saucedemo.com",
+  "framework": "cypress-js",
+  "source": "cypress-js/only-skip.cy.js",
+  "expectedStatus": "converted_with_warnings",
+  "rules": ["CY_ONLY"],
+  "runnable": true
+}
