@@ -20,17 +20,37 @@ function stepFlags(steps: Step[]): Flag[] {
   return steps.flatMap((s) => s.flags);
 }
 
-export type TestContext = { test: Test; titlePath: string[]; hooks: Hook[] };
+// setupBlocked is true when code outside every test was dropped with a BLOCK flag (for example
+// module-level statements, a run-once setup method or a class member). That code may set up
+// state the test depends on, so the test must not run as if it were fully converted.
+export type TestContext = {
+  test: Test;
+  titlePath: string[];
+  hooks: Hook[];
+  setupBlocked?: boolean;
+};
+
+// True when the file has a BLOCK file flag for dropped code that is not itself a test.
+// A flag that only drops tests (droppedTests is not empty) does not affect the other tests.
+export function hasBlockedSetup(file: MigrationFile): boolean {
+  return file.fileFlags.some((f) => f.level === 'BLOCK' && f.droppedTests.length === 0);
+}
 
 // Every test in source order, with its title path and the hooks that run around it
 // (hooks of the file and of every enclosing suite).
 export function collectTests(file: MigrationFile): TestContext[] {
   const out: TestContext[] = [];
+  const setupBlocked = hasBlockedSetup(file);
   const walk = (items: SuiteItem[], titlePath: string[], inherited: Hook[]): void => {
     const hooks = [...inherited, ...items.flatMap((i) => (i.type === 'hook' ? [i.hook] : []))];
     for (const item of items) {
       if (item.type === 'test')
-        out.push({ test: item.test, titlePath: [...titlePath, item.test.name], hooks });
+        out.push({
+          test: item.test,
+          titlePath: [...titlePath, item.test.name],
+          hooks,
+          setupBlocked,
+        });
       if (item.type === 'suite') walk(item.suite.items, [...titlePath, item.suite.name], hooks);
     }
   };
@@ -51,8 +71,10 @@ export function collectHooks(file: MigrationFile): Hook[] {
   return out;
 }
 
-// A test is blocked if any of its steps, or any step of a hook that runs around it, is blocked.
+// A test is blocked if any of its steps, or any step of a hook that runs around it, is blocked,
+// or if setup code outside the tests was dropped with a BLOCK flag.
 export function deriveTestStatus(ctx: TestContext): TestStatus {
+  if (ctx.setupBlocked) return 'blocked';
   const steps = [...ctx.hooks.flatMap((h) => h.steps), ...ctx.test.steps];
   if (steps.some((s) => deriveStepStatus(s) === 'blocked')) return 'blocked';
   return statusOfFlags(stepFlags(steps));
