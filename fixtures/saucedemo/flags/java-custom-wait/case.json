@@ -1,0 +1,11 @@
+{
+  "id": "java-custom-wait",
+  "title": "Java Lambda Wait Is Blocked",
+  "intent": "WebDriverWait.until with a lambda is not converted, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "selenium-java",
+  "source": "selenium-java/CustomWaitTest.java",
+  "expectedStatus": "blocked",
+  "rules": ["CORE_CUSTOM_WAIT"],
+  "runnable": false
+}

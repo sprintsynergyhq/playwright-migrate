@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-java/CheckoutCompleteTest.java",
+  "framework": "selenium-java",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 2,
+    "outputExpects": 3,
+    "blockedAssertions": 0,
+    "info": 9,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "CheckoutCompleteTest > completeCheckoutForOneItem",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 21
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_WAIT_OBJECT",
+      "line": 22
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 28
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 33
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 34
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 39
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 40
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 41
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_CLICKABLE_WAIT_REMOVED",
+      "line": 44
+    }
+  ]
+}

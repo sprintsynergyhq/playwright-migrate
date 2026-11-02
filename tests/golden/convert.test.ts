@@ -20,8 +20,7 @@ import {
 
 const readLf = (file: string): string => readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
 
-// Selenium Java is added here in PR 7.
-const CONVERTED: SourceFramework[] = ['cypress-js', 'selenium-python'];
+const CONVERTED: SourceFramework[] = ['cypress-js', 'selenium-python', 'selenium-java'];
 
 type Golden = {
   id: string;

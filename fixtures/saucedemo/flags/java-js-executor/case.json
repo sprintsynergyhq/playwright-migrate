@@ -1,0 +1,11 @@
+{
+  "id": "java-js-executor",
+  "title": "Java JavaScript Executor Is Blocked",
+  "intent": "JavascriptExecutor.executeScript is not converted, so the test is emitted as test.fixme.",
+  "app": "https://www.saucedemo.com",
+  "framework": "selenium-java",
+  "source": "selenium-java/JsExecutorTest.java",
+  "expectedStatus": "blocked",
+  "rules": ["CORE_JS_EXECUTOR"],
+  "runnable": false
+}

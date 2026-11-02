@@ -36,7 +36,7 @@
     "format:check": "prettier --check .",
     "check:style": "node scripts/check-style.mjs",
     "test": "vitest run",
-    "test:smoke": "node dist/cli.js --version && node dist/cli.js detect fixtures/saucedemo && node scripts/smoke-parse.mjs && node dist/cli.js migrate fixtures/saucedemo/cases/login-success/cypress-js/login-success.cy.js --dry-run && node dist/cli.js migrate fixtures/saucedemo/cases/login-success/selenium-python/test_login_success.py --dry-run",
+    "test:smoke": "node dist/cli.js --version && node dist/cli.js detect fixtures/saucedemo && node scripts/smoke-parse.mjs && node dist/cli.js migrate fixtures/saucedemo/cases/login-success/cypress-js/login-success.cy.js --dry-run && node dist/cli.js migrate fixtures/saucedemo/cases/login-success/selenium-python/test_login_success.py --dry-run && node dist/cli.js migrate fixtures/saucedemo/cases/login-success/selenium-java/LoginSuccessTest.java --dry-run",
     "e2e:expected": "playwright test",
     "e2e:expected:5x": "playwright test --repeat-each=5",
     "check": "npm run lint && npm run format:check && npm run check:style && npm run typecheck && npm test",

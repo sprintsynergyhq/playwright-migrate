@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "source": "selenium-java/CartBadgeTest.java",
+  "framework": "selenium-java",
+  "status": "converted",
+  "counts": {
+    "tests": 1,
+    "sourceAssertions": 4,
+    "outputExpects": 4,
+    "blockedAssertions": 0,
+    "info": 4,
+    "warn": 0,
+    "block": 0
+  },
+  "tests": [
+    {
+      "title": "CartBadgeTest > badgeCountsItems",
+      "status": "converted"
+    }
+  ],
+  "flags": [
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 16
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 18
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_FILL_REPLACES_VALUE",
+      "line": 19
+    },
+    {
+      "level": "INFO",
+      "ruleId": "CORE_DRIVER_LIFECYCLE",
+      "line": 25
+    }
+  ]
+}
