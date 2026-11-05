@@ -214,7 +214,7 @@ Before running the expected specs for the first time, install Chromium with `npx
 
 ## Releasing
 
-Changes are listed in [CHANGELOG.md](CHANGELOG.md). To release, a maintainer pushes a tag `v<version>` that matches the version in `package.json`. The Release workflow (`.github/workflows/release.yml`) checks the tag with `npm run release:check`, runs every check, the expected specs and the demo suites, and then publishes to npm with provenance.
+Changes are listed in [CHANGELOG.md](CHANGELOG.md). To release, a maintainer pushes a tag `v<version>` that matches the version in `package.json`. The Release workflow (`.github/workflows/release.yml`) checks the tag with `npm run release:check`, runs every check, the expected specs and the demo suites, and then publishes to npm with provenance. If that exact version is already on the registry, publish is skipped.
 
 ## Fixtures
 

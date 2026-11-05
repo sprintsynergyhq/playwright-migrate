@@ -65,6 +65,12 @@ describe('release', () => {
     expect(workflow).toContain('id-token: write');
     expect(workflow).toContain('node-version: 24');
     expect(workflow).toContain('npm publish --provenance --access public');
+    expect(workflow).toContain('npm view "$spec" version');
+    expect(workflow).toContain("require('./package.json').version");
+    expect(workflow).toContain('NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}');
+    expect(workflow).toContain('grep -q E404');
+    expect(workflow).toContain('Skipping publish.');
+    expect(workflow.indexOf('npm view')).toBeLessThan(workflow.indexOf('npm publish'));
     expect(workflow).toContain("if: github.repository == 'sprintsynergyhq/playwright-migrate'");
     expect(workflow).toContain('persist-credentials: false');
     const uses = workflow.match(/uses: \S+/g) ?? [];
